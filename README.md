@@ -1,6 +1,7 @@
 # rt Scripts Optimizer
 
-Improves Core Web Vitals score by loading scripts via worker thread. Keeps the main thread idle for users to interact with page as quickly as possible.
+A WordPress plugin that improves Core Web Vitals score by loading scripts via worker thread. Keeps the main thread idle for users to interact with page as quickly as possible.
+
 
 ## Features
 
