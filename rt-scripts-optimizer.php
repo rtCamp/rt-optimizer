@@ -72,13 +72,13 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 
 	$script_handle = 1;
 
-	$priory_handler = [
-		'adsbygoogle',
-	];
+	$priory_handler = [];
 
 	$skip_js = [
 		'lodash',
 		'wp-dom-ready',
+		'wp-hooks',
+		'wp-i18n',
 	];
 
 	if ( is_single() ) {
@@ -91,11 +91,6 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 
 	if ( in_array( $handle, $priory_handler, true ) ) {
 		$script_handle = 0;
-	}
-
-	// Add script handle to exclude the tag from worker thread and  load as it is.
-	if ( 'jetpack-block-slideshow' === $handle || 'newspack-blocks-carousel' === $handle ) {
-		return $tag;
 	}
 
 	// Change the script attributes and id before returning to remove it from main thread.
