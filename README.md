@@ -10,7 +10,7 @@ A WordPress plugin that improves Core Web Vitals score by loading scripts via wo
 
 ## How it works?
 
-1. With the help of `rt_scripts_handler` function hooked with `scripts_loader_tag` filter, the function outputs all script tags with `type="text/rtscript"` which are loaded via `wp_enqueu_scripts`.
+1. With the help of `rt_scripts_handler` function hooked with `scripts_loader_tag` filter, the function outputs all script tags with `type="text/rtscript"` which are loaded via `wp_enqueue_scripts`.
 2. You can filter or skip some javascripts incase any error occurs by adding script handle like this and then scripts will load normally on main thread.
 ```
 // Add script handle to exclude the tag from worker thread and  load as it is.
