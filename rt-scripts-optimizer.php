@@ -25,7 +25,7 @@ function rt_head_scripts() {
 
 	// If AMP page request, return nothing.
 	if ( function_exists( 'amp_is_request' ) && amp_is_request() ) {
-		return '';
+		return null;
 	}
 	?>
 	<script type="text/worker" id="rtpwa">onmessage=function(e){var o=new Request(e.data,{mode:"no-cors",redirect:"follow"});fetch(o)};</script>
@@ -45,11 +45,14 @@ add_action( 'wp_head', 'rt_head_scripts', 0 );
  * Footer scripts
  */
 function rt_footer_scripts() {
-	if ( function_exists( 'amp_is_request' ) && ! amp_is_request() ) {
-		?>
-		<script type="text/javascript">const t = ["mouseover", "keydown", "touchmove", "touchstart", "scroll"]; t.forEach(function (t) { window.addEventListener(t, e, { passive: true }) }); function e() { n(); t.forEach(function (t) { window.removeEventListener(t, e, { passive: true }) }) } function c(t, e, n) { if (typeof n === "undefined") { n = 0 } t[n](function () { n++; if (n === t.length) { e() } else { c(t, e, n) } }) } function u() { var t = document.createEvent("Event"); t.initEvent("DOMContentLoaded", true, true); window.dispatchEvent(t); document.dispatchEvent(t); var e = document.createEvent("Event"); e.initEvent("readystatechange", true, true); window.dispatchEvent(e); document.dispatchEvent(e); var n = document.createEvent("Event"); n.initEvent("load", true, true); window.dispatchEvent(n); document.dispatchEvent(n); var o = document.createEvent("Event"); o.initEvent("show", true, true); window.dispatchEvent(o); document.dispatchEvent(o); var c = window.document.createEvent("UIEvents"); c.initUIEvent("resize", true, true, window, 0); window.dispatchEvent(c); document.dispatchEvent(c); } function rti(t, e) { var n = document.createElement("script"); n.type = "text/javascript"; if (t.src) { n.onload = e; n.onerror = e; n.src = t.src; n.id = t.id } else { n.textContent = t.innerText; n.id = t.id } t.parentNode.removeChild(t); document.body.appendChild(n); if (!t.src) { e() } } function n() { var t = document.querySelectorAll("script"); var n = []; var o;[].forEach.call(t, function (e) { o = e.getAttribute("type"); if (o == "text/rtscript") { n.push(function (t) { rti(e, t) }) } }); c(n, u) }</script>
-		<?php
+
+	// Skip if it is backend or AMP page.
+	if ( function_exists( 'amp_is_request' ) && amp_is_request() ) {
+		return null;
 	}
+	?>
+		<script type="text/javascript">const t = ["mouseover", "keydown", "touchmove", "touchstart", "scroll"]; t.forEach(function (t) { window.addEventListener(t, e, { passive: true }) }); function e() { n(); t.forEach(function (t) { window.removeEventListener(t, e, { passive: true }) }) } function c(t, e, n) { if (typeof n === "undefined") { n = 0 } t[n](function () { n++; if (n === t.length) { e() } else { c(t, e, n) } }) } function u() { var t = document.createEvent("Event"); t.initEvent("DOMContentLoaded", true, true); window.dispatchEvent(t); document.dispatchEvent(t); var e = document.createEvent("Event"); e.initEvent("readystatechange", true, true); window.dispatchEvent(e); document.dispatchEvent(e); var n = document.createEvent("Event"); n.initEvent("load", true, true); window.dispatchEvent(n); document.dispatchEvent(n); var o = document.createEvent("Event"); o.initEvent("show", true, true); window.dispatchEvent(o); document.dispatchEvent(o); var c = window.document.createEvent("UIEvents"); c.initUIEvent("resize", true, true, window, 0); window.dispatchEvent(c); document.dispatchEvent(c); } function rti(t, e) { var n = document.createElement("script"); n.type = "text/javascript"; if (t.src) { n.onload = e; n.onerror = e; n.src = t.src; n.id = t.id } else { n.textContent = t.innerText; n.id = t.id } t.parentNode.removeChild(t); document.body.appendChild(n); if (!t.src) { e() } } function n() { var t = document.querySelectorAll("script"); var n = []; var o;[].forEach.call(t, function (e) { o = e.getAttribute("type"); if (o == "text/rtscript") { n.push(function (t) { rti(e, t) }) } }); c(n, u) }</script>
+	<?php
 }
 add_action( 'wp_footer', 'rt_footer_scripts' );
 
