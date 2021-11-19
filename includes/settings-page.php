@@ -12,14 +12,14 @@
  */
 function rt_settings_init() {
 
-	// Register a new setting options.
+	// Register new setting options.
 	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_exclude_paths' );
 	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_exclude_handles' );
 
 	// Register a new section.
 	add_settings_section(
 		'rt_scripts_optimizer_settings_section',                            // ID.
-		__( 'Script\'s Optimizer Settings', 'RT_Script_Optimizer' ),          // Title.
+		__( 'Script\'s Optimizer Settings', 'RT_Script_Optimizer' ),        // Title.
 		'rt_scripts_optimizer_settings_callback',                           // Callback Function.
 		'rt-scripts-optimizer-settings'                                     // Page.
 	);
