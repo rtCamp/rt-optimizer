@@ -68,7 +68,7 @@ add_action( 'wp_footer', 'rt_footer_scripts' );
 
 /**
  * Setting up scripts id and type attribute to identify which scripts to offload to worker thread and reduce main thread execution on load.
- * This funciton changes script attribute for delaying script execution. The scripts having type="text/rtscript" will be passed to Worker thread and
+ * This function changes script attribute for delaying script execution. The scripts having type="text/rtscript" will be passed to Worker thread and
  * then returned back to DOM once user does any interactions with the site by the means of tap, scroll, keypress, or click.
  *
  * @param string $tag    The `<script>` tag for the enqueued script.
