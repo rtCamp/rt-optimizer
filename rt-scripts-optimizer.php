@@ -92,7 +92,7 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 	 *
 	 * @return bool.
 	 */
-	$disable_rt_optimzer = apply_filters( 'rt_disable_rt_optimzer', false );
+	$disable_rt_optimzer = apply_filters( 'disable_rt_scripts_optimizer', false );
 
 	if ( true === $disable_rt_optimzer ) {
 		return $tag;
