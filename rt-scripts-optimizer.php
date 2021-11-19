@@ -85,6 +85,19 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 		return null;
 	}
 
+	/**
+	 * Checks if the plugin has to be disabled.
+	 *
+	 * Return true if it has to be disabled.
+	 *
+	 * @return bool.
+	 */
+	$disable_rt_optimzer = apply_filters( 'rt_disable_rt_optimzer', false );
+
+	if ( true === $disable_rt_optimzer ) {
+		return $tag;
+	}
+
 	$handles_option_array = explode( ',', get_option( 'rt_scripts_optimizer_exclude_handles' ) );
 	$paths_option_array   = explode( ',', get_option( 'rt_scripts_optimizer_exclude_paths' ) );
 
