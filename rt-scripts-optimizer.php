@@ -13,11 +13,21 @@
  * @package RT_Script_Optimizer
  */
 
+// Include settings options page.
+require_once 'includes/settings-page.php';
+
 // Skip if it is WP Backend.
 if ( is_admin() ) {
 	return;
 }
 
+// Variable to store the scripts to be excluded.
+$skip_js = array(
+	'lodash',
+	'wp-dom-ready',
+	'wp-hooks',
+	'wp-i18n',
+);
 /**
  * Head scripts
  */
@@ -58,7 +68,7 @@ add_action( 'wp_footer', 'rt_footer_scripts' );
 
 /**
  * Setting up scripts id and type attribute to identify which scripts to offload to worker thread and reduce main thread execution on load.
- * This funciton changes script attribute for delaying script execution. The scripts having type="text/rtscript" will be passed to Worker thread and 
+ * This function changes script attribute for delaying script execution. The scripts having type="text/rtscript" will be passed to Worker thread and
  * then returned back to DOM once user does any interactions with the site by the means of tap, scroll, keypress, or click.
  *
  * @param string $tag    The `<script>` tag for the enqueued script.
@@ -69,38 +79,60 @@ add_action( 'wp_footer', 'rt_footer_scripts' );
  */
 function rt_scripts_handler( $tag, $handle, $src ) {
 
+	global $skip_js;
+
 	if ( function_exists( 'amp_is_request' ) && amp_is_request() ) {
 		return null;
 	}
 
-	$script_handle = 1;
+	/**
+	 * Checks if the plugin has to be disabled.
+	 *
+	 * Return true if it has to be disabled.
+	 *
+	 * @return bool.
+	 */
+	$disable_rt_optimzer = apply_filters( 'disable_rt_scripts_optimizer', false );
 
-	$priory_handler = [];
+	if ( true === $disable_rt_optimzer ) {
+		return $tag;
+	}
 
-	$skip_js = [
-		'lodash',
-		'wp-dom-ready',
-		'wp-hooks',
-		'wp-i18n',
-	];
+	$handles_option_array = explode( ',', get_option( 'rt_scripts_optimizer_exclude_handles' ) );
+	$paths_option_array   = explode( ',', get_option( 'rt_scripts_optimizer_exclude_paths' ) );
 
-	if ( is_single() ) {
-		$skip_js[] = 'regenerator-runtime';
+	// Get handle using the paths provided in the settings.
+	foreach ( $paths_option_array as $key => $script_path ) {
+		$script_path = trim( $script_path );
+		if ( empty( $script_path ) ) {
+			continue;
+		}
+
+		if ( strpos( $src, $script_path ) && ! in_array( $handle, $skip_js, true ) ) {
+			array_push( $skip_js, $handle );
+			break;
+		}
+	}
+
+	$skip_js = array_unique( array_merge( $skip_js, $handles_option_array ) );
+
+	$array_regenerator_runtime_script = array_search( 'regenerator-runtime', $skip_js, true );
+
+	// If page is single post or page and the script is not in the skip_js array then skip regenerator-runtime script.
+	if ( is_single() && ! $array_regenerator_runtime ) {
+		array_push( $skip_js, 'regenerator-runtime' );
+	} elseif ( $array_regenerator_runtime ) {
+		unset( $skip_js[ $array_regenerator_runtime ] );
 	}
 
 	if ( in_array( $handle, $skip_js, true ) ) {
 		return $tag;
 	}
 
-	if ( in_array( $handle, $priory_handler, true ) ) {
-		$script_handle = 0;
-	}
-
 	// Change the script attributes and id before returning to remove it from main thread.
 	$tag = sprintf(
-		'<script type="text/rtscript" src="%s" data-inline="%s" id="%s"></script>',
+		'<script type="text/rtscript" src="%s" id="%s"></script>',  // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		esc_url( $src ),
-		esc_attr( $script_handle ),
 		$handle . '-js'
 	);
 
@@ -111,7 +143,7 @@ add_filter( 'script_loader_tag', 'rt_scripts_handler', 10, 3 );
 
 
 /**
- * Remove concating all js if site is using nginx-http plugin for files concatination or site is hosted on WordPress VIP. 
+ * Remove concating all js if site is using nginx-http plugin for files concatination or site is hosted on WordPress VIP.
  */
 add_filter( 'js_do_concat', '__return_false' );
 
