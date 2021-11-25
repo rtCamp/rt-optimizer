@@ -19,7 +19,7 @@ function rt_settings_init() {
 	// Register a new section.
 	add_settings_section(
 		'rt_scripts_optimizer_settings_section',                            // ID.
-		__( 'Script\'s Optimizer Settings', 'RT_Script_Optimizer' ),        // Title.
+		__( 'RT Scripts Optimizer Settings', 'RT_Script_Optimizer' ),        // Title.
 		'rt_scripts_optimizer_settings_callback',                           // Callback Function.
 		'rt-scripts-optimizer-settings'                                     // Page.
 	);
@@ -27,7 +27,7 @@ function rt_settings_init() {
 	// Register a new field to fetch paths of scripts to exclude.
 	add_settings_field(
 		'rt_scripts_optimizer_path_field',                              // As of WP 4.6 this value is used only internally.
-		__( 'Script path\'s', 'RT_Script_Optimizer' ),                    // Title.
+		__( 'Load js normally by adding script path here', 'RT_Script_Optimizer' ),                    // Title.
 		'rt_scripts_optimizer_paths_field_callback',                    // Callback Function.
 		'rt-scripts-optimizer-settings',                                // Page.
 		'rt_scripts_optimizer_settings_section',                        // Section.
@@ -36,7 +36,7 @@ function rt_settings_init() {
 	// Register a new field to fetch handles of scripts to exclude.
 	add_settings_field(
 		'rt_scripts_optimizer_handle_field',                            // As of WP 4.6 this value is used only internally.
-		__( 'Script handle\'s', 'RT_Script_Optimizer' ),                  // Title.
+		__( 'Load js normally by adding script handles', 'RT_Script_Optimizer' ),                  // Title.
 		'rt_scripts_optimizer_handles_field_callback',                  // Callback Function.
 		'rt-scripts-optimizer-settings',                                // Page.
 		'rt_scripts_optimizer_settings_section',                        // Section.
@@ -57,7 +57,7 @@ add_action( 'admin_init', 'rt_settings_init' );
 function rt_scripts_optimizer_settings_callback( $args ) {
 	?>
 		<p>
-			<?php esc_html_e( 'Add Scripts you want to exclude from the optimizer by providing it\'s handle or path.', 'RT_Script_Optimizer' ); ?>
+			<?php esc_html_e( 'Add scripts to exclude from the RT Scripts Optimizer by providing it\'s handle or path.', 'RT_Script_Optimizer' ); ?>
 		</p>
 	<?php
 }
@@ -83,7 +83,7 @@ function rt_scripts_optimizer_handles_field_callback( $args ) {
 	<br>
 
 	<p class = 'description' >
-		<?php esc_html_e( 'Adding script handles to this field will exclude them from optimizer.', 'RT_Script_Optimizer' ); ?>
+		<?php esc_html_e( 'Adding script handles to this field will exclude them from optimizer and load them normally.', 'RT_Script_Optimizer' ); ?>
 	</p>
 	<?php
 }
@@ -109,7 +109,7 @@ function rt_scripts_optimizer_paths_field_callback( $args ) {
 	<br>
 
 	<p class = 'description' >
-		<?php esc_html_e( 'Adding script path to this field will exclude them from optimizer.', 'RT_Script_Optimizer' ); ?>
+		<?php esc_html_e( 'Adding script path to this field will exclude them from optimizer and load them normally.', 'RT_Script_Optimizer' ); ?>
 	</p>
 	<?php
 }
@@ -123,8 +123,8 @@ add_action( 'admin_menu', 'rt_scripts_optimizer_options_submenu' );
 function rt_scripts_optimizer_options_submenu() {
 
 	add_options_page(
-		__( 'rt-scripts Optimizer', 'RT_Script_Optimizer' ),
-		__( 'Script\'s Optimizer', 'RT_Script_Optimizer' ),
+		__( 'RT Scripts Optimizer', 'RT_Script_Optimizer' ),
+		__( 'RT Scripts Optimizer', 'RT_Script_Optimizer' ),
 		'manage_options',
 		'rt-scripts-optimizer-settings',
 		'rt_scripts_optimizer_settings_template'
