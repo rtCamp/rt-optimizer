@@ -82,7 +82,7 @@ function rt_scripts_optimizer_handles_field_callback( $args ) {
 
 	<br>
 
-	<p class = 'description' >
+	<p class='description'>
 		<?php esc_html_e( 'Adding script handles to this field will exclude them from optimizer and load them normally.', 'RT_Script_Optimizer' ); ?>
 	</p>
 	<?php
@@ -108,7 +108,7 @@ function rt_scripts_optimizer_paths_field_callback( $args ) {
 
 	<br>
 
-	<p class = 'description' >
+	<p class='description'>
 		<?php esc_html_e( 'Adding script path to this field will exclude them from optimizer and load them normally.', 'RT_Script_Optimizer' ); ?>
 	</p>
 	<?php
