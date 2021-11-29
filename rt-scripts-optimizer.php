@@ -94,7 +94,7 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 	 */
 	$disable_rt_optimzer = apply_filters( 'disable_rt_scripts_optimizer', false );
 
-	if ( true === $disable_rt_optimzer ) {
+	if ( $disable_rt_optimzer ) {
 		return $tag;
 	}
 
@@ -119,10 +119,10 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 	$array_regenerator_runtime_script = array_search( 'regenerator-runtime', $skip_js, true );
 
 	// If page is single post or page and the script is not in the skip_js array then skip regenerator-runtime script.
-	if ( is_single() && ! $array_regenerator_runtime ) {
+	if ( is_single() && ! $array_regenerator_runtime_script ) {
 		array_push( $skip_js, 'regenerator-runtime' );
-	} elseif ( $array_regenerator_runtime ) {
-		unset( $skip_js[ $array_regenerator_runtime ] );
+	} elseif ( $array_regenerator_runtime_script ) {
+		unset( $skip_js[ $array_regenerator_runtime_script ] );
 	}
 
 	if ( in_array( $handle, $skip_js, true ) ) {
