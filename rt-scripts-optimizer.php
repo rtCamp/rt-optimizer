@@ -21,6 +21,11 @@ if ( is_admin() ) {
 	return;
 }
 
+// Skip if it is customizer preview.
+if ( isset( $_REQUEST['customize_changeset_uuid'] ) ) {
+	return;
+}
+
 // Variable to store the scripts to be excluded.
 $skip_js = array(
 	'lodash',
@@ -82,7 +87,7 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 	global $skip_js;
 
 	if ( function_exists( 'amp_is_request' ) && amp_is_request() ) {
-		return null;
+		return $tag;
 	}
 
 	/**
