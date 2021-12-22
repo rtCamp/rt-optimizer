@@ -14,7 +14,7 @@
  */
 
 // Include settings options page.
-require_once 'includes/settings-page.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/settings-page.php';
 
 // Skip if it is WP Backend.
 if ( is_admin() ) {
@@ -22,7 +22,7 @@ if ( is_admin() ) {
 }
 
 // Skip if it is customizer preview.
-if ( isset( $_REQUEST['customize_changeset_uuid'] ) ) {
+if ( isset( $_REQUEST['customize_changeset_uuid'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	return;
 }
 
