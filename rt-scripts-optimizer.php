@@ -24,7 +24,7 @@ if ( is_admin() ) {
 }
 
 // Skip if it is customizer preview.
-if ( isset( $_REQUEST['customize_changeset_uuid'] ) ) { //phpcs:ignore 
+if ( isset( $_REQUEST['customize_changeset_uuid'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	return;
 }
 
