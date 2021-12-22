@@ -30,7 +30,7 @@ function rt_settings_init() {
 		__( 'Load js normally by adding script path here', 'RT_Script_Optimizer' ),                    // Title.
 		'rt_scripts_optimizer_paths_field_callback',                    // Callback Function.
 		'rt-scripts-optimizer-settings',                                // Page.
-		'rt_scripts_optimizer_settings_section',                        // Section.
+		'rt_scripts_optimizer_settings_section'                         // Section.
 	);
 
 	// Register a new field to fetch handles of scripts to exclude.
@@ -39,7 +39,7 @@ function rt_settings_init() {
 		__( 'Load js normally by adding script handles', 'RT_Script_Optimizer' ),                  // Title.
 		'rt_scripts_optimizer_handles_field_callback',                  // Callback Function.
 		'rt-scripts-optimizer-settings',                                // Page.
-		'rt_scripts_optimizer_settings_section',                        // Section.
+		'rt_scripts_optimizer_settings_section'                         // Section.
 	);
 }
 
