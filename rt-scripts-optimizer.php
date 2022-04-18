@@ -110,14 +110,21 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 
 	// Get handle using the paths provided in the settings.
 	foreach ( $paths_option_array as $key => $script_path ) {
-		$script_path = trim( $script_path );
+		$script_path = trim( $script_path, '/' );
 		if ( empty( $script_path ) ) {
 			continue;
 		}
 
-		if ( strpos( $src, $script_path ) && ! in_array( $handle, $skip_js, true ) ) {
-			array_push( $skip_js, $handle );
-			break;
+		$regex_pattern = get_site_url();
+
+		$regex_pattern = escape_regex_special_characters( $regex_pattern . '/' . $script_path );
+
+		$regex_pattern = $regex_pattern . '(\/?|\/?\?((([a-zA-Z0-9\%.]+=[a-zA-Z0-9\%.]+)(\&([a-zA-Z0-9\%.]+=[a-zA-Z0-9\%.]+))*)\&?)?)' . '$';
+
+		$regex_pattern = '/' . $regex_pattern . '/';
+
+		if ( preg_match( $regex_pattern, $src ) ) {
+			return $tag;
 		}
 	}
 
@@ -186,4 +193,18 @@ function disable_emojis_remove_dns_prefetch( $urls, $relation_type ) {
 		$urls = array_diff( $urls, array( $emoji_svg_url ) );
 	}
 	return $urls;
+}
+
+/**
+ * Escapes regex reserved characters.
+ *
+ * @param string $unescaped_value value whose regex characters are to be escaped.
+ *
+ * @return string Regex characters escaped string.
+ */
+function escape_regex_special_characters( $unescaped_value ) {
+	$escaped_value = str_replace( '/', '\/', $unescaped_value );
+	$escaped_value = str_replace( '.', '\.', $escaped_value );
+	$escaped_value = str_replace( '$', '\$', $escaped_value );
+	return $escaped_value;
 }
