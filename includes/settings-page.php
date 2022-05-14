@@ -15,6 +15,12 @@ function rt_settings_init() {
 	// Register new setting options.
 	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_exclude_paths' );
 	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_exclude_handles' );
+	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_style_dequeue_non_logged_handles' );
+	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_style_async_handles' );
+	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_style_async_handles_onevent' );
+	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_load_amp_boilerplate_style' );
+	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_skip_css_concatination_all' );
+	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_skip_css_concatination_handles' );
 
 	// Register a new section.
 	add_settings_section(
@@ -38,6 +44,60 @@ function rt_settings_init() {
 		'rt_scripts_optimizer_handle_field',                            // As of WP 4.6 this value is used only internally.
 		__( 'Load js normally by adding script handles', 'RT_Script_Optimizer' ),                  // Title.
 		'rt_scripts_optimizer_handles_field_callback',                  // Callback Function.
+		'rt-scripts-optimizer-settings',                                // Page.
+		'rt_scripts_optimizer_settings_section'                         // Section.
+	);
+
+	// Register a new field to fetch handles of styles to be dequeued for non-logged in users.
+	add_settings_field(
+		'rt_scripts_optimizer_style_dequeue_non_logged_handles',                            // As of WP 4.6 this value is used only internally.
+		__( 'CSS handles of the stylesheets which should not be loaded if user not logged in', 'RT_Script_Optimizer' ),                  // Title.
+		'rt_scripts_optimizer_style_dequeue_non_logged_handles_callback',                  // Callback Function.
+		'rt-scripts-optimizer-settings',                                // Page.
+		'rt_scripts_optimizer_settings_section'                         // Section.
+	);
+
+	// Register a new field to fetch handles of styles to be loaded async.
+	add_settings_field(
+		'rt_scripts_optimizer_style_async_handles',                            // As of WP 4.6 this value is used only internally.
+		__( 'CSS handles of the stylesheets which should be asynchronously loaded', 'RT_Script_Optimizer' ),                  // Title.
+		'rt_scripts_optimizer_style_async_handles_callback',                  // Callback Function.
+		'rt-scripts-optimizer-settings',                                // Page.
+		'rt_scripts_optimizer_settings_section'                         // Section.
+	);
+
+	// Register a new field to fetch handles of styles to be loaded on any window event.
+	add_settings_field(
+		'rt_scripts_optimizer_style_async_handles_onevent',                            // As of WP 4.6 this value is used only internally.
+		__( 'CSS handles of the stylesheets which should be asynchronously loaded on any window event', 'RT_Script_Optimizer' ),                  // Title.
+		'rt_scripts_optimizer_style_async_handles_onevent_callback',                  // Callback Function.
+		'rt-scripts-optimizer-settings',                                // Page.
+		'rt_scripts_optimizer_settings_section'                         // Section.
+	);
+
+	// Register a new field to fetch option whether to load amp-boilerplate style.
+	add_settings_field(
+		'rt_scripts_optimizer_load_amp_boilerplate_style',                            // As of WP 4.6 this value is used only internally.
+		__( 'Load AMP boilerplate CSS', 'RT_Script_Optimizer' ),                  // Title.
+		'rt_scripts_optimizer_load_amp_boilerplate_style_callback',                  // Callback Function.
+		'rt-scripts-optimizer-settings',                                // Page.
+		'rt_scripts_optimizer_settings_section'                         // Section.
+	);
+
+	// Register a new field to fetch option whether to skip all CSS concatination.
+	add_settings_field(
+		'rt_scripts_optimizer_skip_css_concatination_all',                            // As of WP 4.6 this value is used only internally.
+		__( 'Skip all CSS concatination', 'RT_Script_Optimizer' ),                  // Title.
+		'rt_scripts_optimizer_skip_css_concatination_all_callback',                  // Callback Function.
+		'rt-scripts-optimizer-settings',                                // Page.
+		'rt_scripts_optimizer_settings_section'                         // Section.
+	);
+
+	// Register a new field to fetch handles of stylesheets which are not to be concated.
+	add_settings_field(
+		'rt_scripts_optimizer_skip_css_concatination_handles',                            // As of WP 4.6 this value is used only internally.
+		__( 'Skip CSS concatination for these handles', 'RT_Script_Optimizer' ),                  // Title.
+		'rt_scripts_optimizer_skip_css_concatination_handles_callback',                  // Callback Function.
 		'rt-scripts-optimizer-settings',                                // Page.
 		'rt_scripts_optimizer_settings_section'                         // Section.
 	);
@@ -84,6 +144,152 @@ function rt_scripts_optimizer_handles_field_callback( $args ) {
 
 	<p class='description'>
 		<?php esc_html_e( 'Adding script handles to this field will exclude them from optimizer and load them normally.', 'RT_Script_Optimizer' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Field callback to accept handles of stylesheets to be dequeued when user not logged in.
+ *
+ * @param array $args arguments passed.
+ */
+function rt_scripts_optimizer_style_dequeue_non_logged_handles_callback( $args ) {
+
+	// option value.
+	$paths = get_option( 'rt_scripts_optimizer_style_dequeue_non_logged_handles' );
+	?>
+
+	<input type="text"
+		id="rt_optimizer_style_dequeue_non_logged_handles"
+		name="rt_scripts_optimizer_style_dequeue_non_logged_handles"
+		value="<?php echo esc_attr( $paths ); ?>"
+		style="width:80%;"
+	>
+
+	<br>
+
+	<p class='description'>
+		<?php esc_html_e( 'Adding stylesheets\' handles here will make them be dequeued when user not logged in.', 'RT_Script_Optimizer' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Field callback to accept handles of stylesheets to be loaded asynchronously.
+ *
+ * @param array $args arguments passed.
+ */
+function rt_scripts_optimizer_style_async_handles_callback( $args ) {
+
+	// option value.
+	$paths = get_option( 'rt_scripts_optimizer_style_async_handles' );
+	?>
+
+	<input type="text"
+		id="rt_optimizer_style_async_handles"
+		name="rt_scripts_optimizer_style_async_handles"
+		value="<?php echo esc_attr( $paths ); ?>"
+		style="width:80%;"
+	>
+
+	<br>
+
+	<p class='description'>
+		<?php esc_html_e( 'Adding stylesheets\' handle here will make them load asynchronously automatically.', 'RT_Script_Optimizer' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Field callback to accept handles of stylesheets to be loaded asynchronously on windows event.
+ *
+ * @param array $args arguments passed.
+ */
+function rt_scripts_optimizer_style_async_handles_onevent_callback( $args ) {
+
+	// option value.
+	$paths = get_option( 'rt_scripts_optimizer_style_async_handles_onevent' );
+	?>
+
+	<input type="text"
+		id="rt_optimizer_style_async_on_event_handles"
+		name="rt_scripts_optimizer_style_async_handles_onevent"
+		value="<?php echo esc_attr( $paths ); ?>"
+		style="width:80%;"
+	>
+
+	<br>
+
+	<p class='description'>
+		<?php esc_html_e( 'Adding stylesheets\' handle here will make them load asynchronously on windows event.', 'RT_Script_Optimizer' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Field callback to take input of whether to include amp-boilerplate css or not.
+ *
+ * @param array $args arguments passed.
+ */
+function rt_scripts_optimizer_load_amp_boilerplate_style_callback( $args ) {
+
+	// option value.
+	$load_amp_css = get_option( 'rt_scripts_optimizer_load_amp_boilerplate_style' );
+	?>
+
+	<input type="checkbox" id="rt_optimizer_load_amp_css" name="rt_scripts_optimizer_load_amp_boilerplate_style" value="1" <?php checked( $load_amp_css, '1', true ); ?>>
+
+	<br>
+
+	<p class='description'>
+		<?php esc_html_e( 'Check this if you want to load AMP boilerplate CSS to avoid CLS issue.', 'RT_Script_Optimizer' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Field callback to take input of whether to skip all CSS concatination or not.
+ *
+ * @param array $args arguments passed.
+ */
+function rt_scripts_optimizer_skip_css_concatination_all_callback( $args ) {
+
+	// option value.
+	$skip_css_concatination = get_option( 'rt_scripts_optimizer_skip_css_concatination_all' );
+	?>
+
+	<input type="checkbox" id="rt_optimizer_skip_css_concatination_all" name="rt_scripts_optimizer_skip_css_concatination_all" value="1" <?php checked( $skip_css_concatination, '1', true ); ?>>
+
+	<br>
+
+	<p class='description'>
+		<?php esc_html_e( 'Check this if you want to disable CSS concatination completely. If this is checked then the below field have no effect.', 'RT_Script_Optimizer' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Field callback to take input of stylesheet handles which are not to be concated.
+ *
+ * @param array $args arguments passed.
+ */
+function rt_scripts_optimizer_skip_css_concatination_handles_callback( $args ) {
+
+	// option value.
+	$handles = get_option( 'rt_scripts_optimizer_skip_css_concatination_handles' );
+	?>
+
+	<input type="text"
+		id="rt_optimizer_skip_css_concatination_handles"
+		name="rt_scripts_optimizer_skip_css_concatination_handles"
+		value="<?php echo esc_attr( $handles ); ?>"
+		style="width:80%;"
+	>
+
+	<br>
+
+	<p class='description'>
+		<?php esc_html_e( 'Disable CSS concatination of the supplied handles. If the skip all concatination checkbox is checked then these values will have no effect.', 'RT_Script_Optimizer' ); ?>
 	</p>
 	<?php
 }
