@@ -13,10 +13,11 @@
  * @package RT_Script_Optimizer
  */
 
-define( 'RT_SCRIPTS_OPTIMIZER_DIR_PATH', plugin_dir_path( __FILE__ ) );
+define( 'RT_SCRIPTS_OPTIMIZER_DIR_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
+define( 'RT_SCRIPTS_OPTIMIZER_DIR_URL', untrailingslashit( plugin_dir_url( __FILE__ ) ) );
 
 // Include settings options page.
-require_once RT_SCRIPTS_OPTIMIZER_DIR_PATH . 'includes/settings-page.php';
+require_once RT_SCRIPTS_OPTIMIZER_DIR_PATH . '/includes/settings-page.php';
 
 // Skip if it is WP Backend.
 if ( is_admin() ) {
@@ -329,7 +330,7 @@ function disable_emojis_remove_dns_prefetch( $urls, $relation_type ) {
  */
 function loadcss_scripts() {
 
-	wp_enqueue_script( 'loadCSS', plugins_url( 'assets/js/loadCSS.min.js', __FILE__ ), array(), get_plugin_data( __FILE__ )['Version'] );
+	wp_enqueue_script( 'loadCSS', RT_SCRIPTS_OPTIMIZER_DIR_URL . '/assets/js/loadCSS.min.js', array(), filemtime( RT_SCRIPTS_OPTIMIZER_DIR_PATH . '/assets/js/loadCSS.min.js' ), false );
 
 }
 add_action( 'wp_enqueue_scripts', 'loadCSS_scripts' );
