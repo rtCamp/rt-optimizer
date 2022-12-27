@@ -216,6 +216,24 @@ function style_enqueue_script() {
 		<script type="text/javascript">
 			const s_i_e=["mouseover","keydown","touchmove","touchstart","scroll"];function s_i_e_e(){s_i(),s_i_e.forEach(function(e){window.removeEventListener(e,s_i_e_e,{passive:!0})})}function s_i_rti(e){loadCSS(e.href),e.href||s_i_e_e()}function s_i(){var e=document.querySelectorAll("link");[].forEach.call(e,function(e){"rt-optimized-onevent-stylesheet"==e.getAttribute("rel")&&s_i_rti(e)})}s_i_e.forEach(function(e){window.addEventListener(e,s_i_e_e,{passive:!0})}),function(){var e=document.querySelectorAll("link");[].forEach.call(e,function(e){"rt-optimized-stylesheet"==e.getAttribute("rel")&&loadCSS(e.href)})}();
 		</script>
+
+		<script type="text/javascript">
+			const iframes = document.getElementsByTagName('iframe');
+			const iframesObserver = new IntersectionObserver((entries, self) => {
+				entries.forEach((entry) => {
+					if(entry.isIntersecting) {
+						entry.target.src = entry.target.getAttribute('data-src');
+						self.unobserve(entry.target);
+					}
+				})
+			},{
+				threshold: 0,
+				rootMargin: '200px'
+			});
+			Array.from(iframes).forEach(function (el) {
+				iframesObserver.observe(el);
+			});
+		</script>
 	<?php
 }
 add_action( 'wp_footer', 'style_enqueue_script' );
@@ -328,9 +346,28 @@ function disable_emojis_remove_dns_prefetch( $urls, $relation_type ) {
 /**
  * Enqueues loadCSS scripts.
  */
-function loadcss_scripts() {
+function rt_scripts_optimizer_load_scripts() {
 
 	wp_enqueue_script( 'loadCSS', RT_SCRIPTS_OPTIMIZER_DIR_URL . '/assets/js/loadCSS.min.js', array(), filemtime( RT_SCRIPTS_OPTIMIZER_DIR_PATH . '/assets/js/loadCSS.min.js' ), false );
 
 }
-add_action( 'wp_enqueue_scripts', 'loadCSS_scripts' );
+add_action( 'wp_enqueue_scripts', 'rt_scripts_optimizer_load_scripts' );
+
+/**
+ * Rename src attribute of iframes to block them from automatically loading on page load.
+ *
+ * This will be loaded by javascript.
+ *
+ * @param string $content Original content.
+ *
+ * @return string Modified content.
+ */
+function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
+
+	$content = preg_replace( '~<iframe[^>]*\K (?=src=)~i', ' data-', $content );
+
+	return $content;
+
+}
+
+add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading' );
