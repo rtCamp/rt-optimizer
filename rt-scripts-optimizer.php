@@ -218,20 +218,22 @@ function style_enqueue_script() {
 		</script>
 
 		<script type="text/javascript">
-			const iframes = document.getElementsByTagName('iframe');
-			const iframesObserver = new IntersectionObserver((entries, self) => {
-				entries.forEach((entry) => {
-					if(entry.isIntersecting) {
-						entry.target.src = entry.target.getAttribute('data-src');
-						self.unobserve(entry.target);
-					}
-				})
-			},{
-				threshold: 0,
-				rootMargin: '200px'
-			});
-			Array.from(iframes).forEach(function (el) {
-				iframesObserver.observe(el);
+			document.addEventListener('DOMContentLoaded', () => {
+				const iframes = document.getElementsByTagName('iframe');
+				const iframesObserver = new IntersectionObserver((entries, self) => {
+					entries.forEach((entry) => {
+						if(entry.isIntersecting) {
+							entry.target.src = entry.target.getAttribute('data-src');
+							self.unobserve(entry.target);
+						}
+					})
+				},{
+					threshold: 0,
+					rootMargin: '200px'
+				});
+				Array.from(iframes).forEach(function (el) {
+					iframesObserver.observe(el);
+				});
 			});
 		</script>
 	<?php
@@ -364,10 +366,8 @@ add_action( 'wp_enqueue_scripts', 'rt_scripts_optimizer_load_scripts' );
  */
 function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
 
-	$content = preg_replace( '~<iframe[^>]*\K (?=src=)~i', ' data-', $content );
-
-	return $content;
+	return preg_replace( '~<iframe[^>]*\K (?=src=)~i', ' data-', $content );
 
 }
 
-add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading' );
+add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_MAX );
