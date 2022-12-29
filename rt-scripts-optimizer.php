@@ -223,7 +223,10 @@ function style_enqueue_script() {
 				const iframesObserver = new IntersectionObserver((entries, self) => {
 					entries.forEach((entry) => {
 						if(entry.isIntersecting) {
-							entry.target.src = entry.target.getAttribute('data-src');
+							const targetURL = entry.target.getAttribute('data-src');
+							if ( targetURL !== null ) {
+								entry.target.src = targetURL;
+							}
 							self.unobserve(entry.target);
 						}
 					})
