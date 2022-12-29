@@ -237,6 +237,30 @@ function style_enqueue_script() {
 				Array.from(iframes).forEach(function (el) {
 					iframesObserver.observe(el);
 				});
+				const tweets = document.getElementsByClassName('wp-block-embed-twitter');
+				const reddit = document.getElementsByClassName('wp-block-embed-reddit');
+				const scriptLoadedIframes = Array.from(tweets).concat( Array.from(reddit) );
+				const scriptLoadedIframesObserver = new IntersectionObserver((entries, self) => {
+					entries.forEach((entry) => {
+						if(entry.isIntersecting) {
+							var target = entry.target;
+							var scriptElement = target.getElementsByTagName('script');
+							Array.from(scriptElement).forEach(function (el) {
+								var newIframeScript = document.createElement('script');
+								newIframeScript.setAttribute('src', el.src);
+								target.append(newIframeScript);
+
+							});
+							self.unobserve(entry.target);
+						}
+					})
+				},{
+					threshold: 0,
+					rootMargin: '200px'
+				});
+				scriptLoadedIframes.forEach(function (el) {
+					scriptLoadedIframesObserver.observe(el);
+				});
 			});
 		</script>
 	<?php
@@ -374,3 +398,23 @@ function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
 }
 
 add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_MAX );
+
+/**
+ * Modifies output of some of the embed blocks.
+ *
+ * @param string $block_content Block content.
+ * @param array  $block Block data.
+ */
+function rt_scripts_optimizer_modify_embeds( $block_content, $block ) {
+
+	if ( 'core/embed' === $block['blockName'] && in_array( $block['attrs']['providerNameSlug'], [ 'reddit', 'twitter' ], true ) ) {
+
+		$block_content = preg_replace( '~<script~i', '<script type=\'text/rtscript-noautoload\'', $block_content );
+
+	}
+
+	return $block_content;
+
+}
+
+add_filter( 'render_block', 'rt_scripts_optimizer_modify_embeds', 10, 2 );
