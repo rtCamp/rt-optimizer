@@ -216,6 +216,53 @@ function style_enqueue_script() {
 		<script type="text/javascript">
 			const s_i_e=["mouseover","keydown","touchmove","touchstart","scroll"];function s_i_e_e(){s_i(),s_i_e.forEach(function(e){window.removeEventListener(e,s_i_e_e,{passive:!0})})}function s_i_rti(e){loadCSS(e.href),e.href||s_i_e_e()}function s_i(){var e=document.querySelectorAll("link");[].forEach.call(e,function(e){"rt-optimized-onevent-stylesheet"==e.getAttribute("rel")&&s_i_rti(e)})}s_i_e.forEach(function(e){window.addEventListener(e,s_i_e_e,{passive:!0})}),function(){var e=document.querySelectorAll("link");[].forEach.call(e,function(e){"rt-optimized-stylesheet"==e.getAttribute("rel")&&loadCSS(e.href)})}();
 		</script>
+
+		<script type="text/javascript">
+			document.addEventListener('DOMContentLoaded', () => {
+				const iframes = document.getElementsByTagName('iframe');
+				const iframesObserver = new IntersectionObserver((entries, self) => {
+					entries.forEach((entry) => {
+						if(entry.isIntersecting) {
+							const targetURL = entry.target.getAttribute('data-src');
+							if ( targetURL !== null ) {
+								entry.target.src = targetURL;
+							}
+							self.unobserve(entry.target);
+						}
+					})
+				},{
+					threshold: 0,
+					rootMargin: '200px'
+				});
+				Array.from(iframes).forEach(function (el) {
+					iframesObserver.observe(el);
+				});
+				const tweets = document.getElementsByClassName('wp-block-embed-twitter');
+				const reddit = document.getElementsByClassName('wp-block-embed-reddit');
+				const scriptLoadedIframes = Array.from(tweets).concat( Array.from(reddit) );
+				const scriptLoadedIframesObserver = new IntersectionObserver((entries, self) => {
+					entries.forEach((entry) => {
+						if(entry.isIntersecting) {
+							var target = entry.target;
+							var scriptElement = target.getElementsByTagName('script');
+							Array.from(scriptElement).forEach(function (el) {
+								var newIframeScript = document.createElement('script');
+								newIframeScript.setAttribute('src', el.src);
+								target.append(newIframeScript);
+
+							});
+							self.unobserve(entry.target);
+						}
+					})
+				},{
+					threshold: 0,
+					rootMargin: '200px'
+				});
+				scriptLoadedIframes.forEach(function (el) {
+					scriptLoadedIframesObserver.observe(el);
+				});
+			});
+		</script>
 	<?php
 }
 add_action( 'wp_footer', 'style_enqueue_script' );
@@ -328,9 +375,46 @@ function disable_emojis_remove_dns_prefetch( $urls, $relation_type ) {
 /**
  * Enqueues loadCSS scripts.
  */
-function loadcss_scripts() {
+function rt_scripts_optimizer_load_scripts() {
 
 	wp_enqueue_script( 'loadCSS', RT_SCRIPTS_OPTIMIZER_DIR_URL . '/assets/js/loadCSS.min.js', array(), filemtime( RT_SCRIPTS_OPTIMIZER_DIR_PATH . '/assets/js/loadCSS.min.js' ), false );
 
 }
-add_action( 'wp_enqueue_scripts', 'loadCSS_scripts' );
+add_action( 'wp_enqueue_scripts', 'rt_scripts_optimizer_load_scripts' );
+
+/**
+ * Rename src attribute of iframes to block them from automatically loading on page load.
+ *
+ * This will be loaded by javascript.
+ *
+ * @param string $content Original content.
+ *
+ * @return string Modified content.
+ */
+function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
+
+	return preg_replace( '~<iframe[^>]*\K (?=src=)~i', ' data-', $content );
+
+}
+
+add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_MAX );
+
+/**
+ * Modifies output of some of the embed blocks.
+ *
+ * @param string $block_content Block content.
+ * @param array  $block Block data.
+ */
+function rt_scripts_optimizer_modify_embeds( $block_content, $block ) {
+
+	if ( 'core/embed' === $block['blockName'] && in_array( $block['attrs']['providerNameSlug'], [ 'reddit', 'twitter' ], true ) ) {
+
+		$block_content = preg_replace( '~<script~i', '<script type=\'text/rtscript-noautoload\'', $block_content );
+
+	}
+
+	return $block_content;
+
+}
+
+add_filter( 'render_block', 'rt_scripts_optimizer_modify_embeds', 10, 2 );
