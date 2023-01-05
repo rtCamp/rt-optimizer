@@ -1,0 +1,67 @@
+@import "_normalize"
+@import "_common"
+@import "../node_modules/prismjs/themes/prism-okaidia"
+
+.page
+	max-width: 50em
+	margin: 4em auto
+	padding: 0 2em
+
+.bookmarklet
+	margin: 2em 0
+	text-align: center
+
+	&-link
+		display: inline-block
+		border: 0.1em solid $border-color
+		border-radius: 1em
+		padding: 0.6em 1em 0.4em
+		font-size: 1.5em
+		&:hover
+			color: $background-color
+			background-color: $border-color
+			text-decoration: none
+
+	&-desc
+		margin: 1em 0
+		font-size: 0.8em
+
+#view-settings
+	vertical-align: middle
+	+ label
+		margin: 0 0 0 0.2em
+
+.report
+	max-width: 60em
+	margin: 0 auto
+	padding: 1em 2em
+
+	> h1
+		> a
+			font-size: 0.6em
+			white-space: nowrap
+
+	&-item
+		margin: 3em 0
+		border-top: 1px solid $border-color
+
+		h2
+			color: $red
+
+		&.-passed
+			#view-settings:checked ~ &
+				display: none
+
+			h2
+				color: $green
+
+		&-header
+			> img
+				float: right
+				max-width: 50%
+				max-height: 4em
+
+.docs
+	&-item
+		margin: 4em 0
+		border-top: 1px solid $border-color
