@@ -14,7 +14,7 @@
 .image-linter-window iframe {
 	background: rgb(255, 255, 255);
 	height: 60vh;
-	width: 99.7%;
+	width: 100%;
 	position: absolute;
 	bottom: 0;
 	border-top: 10px solid rgb(56, 56, 56);
