@@ -1,0 +1,20 @@
+.image-linter-window {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	visibility: hidden;
+	background: white;
+}
+
+.image-linter-window .display-image-linter {
+	visibility: visible;
+}
+
+.image-linter-window iframe {
+	background: rgb(255, 255, 255);
+	height: 60vh;
+	width: 99.7%;
+	position: absolute;
+	bottom: 0;
+	border-top: 10px solid rgb(56, 56, 56);
+}

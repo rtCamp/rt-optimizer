@@ -263,7 +263,53 @@ function style_enqueue_script() {
 				});
 			});
 		</script>
-	<?php
+
+		<?php
+
+		if ( current_user_can( 'manage_options' ) ) {
+
+			?>
+
+				<div id="image-linter-main-window" class="image-linter-window"></div>
+
+				<script>
+					const lintImageButton = document.querySelector('#wp-admin-bar-lint-images .ab-item');
+					lintImageButton.addEventListener('click', ()=> {
+						const lintDisplayWindow = document.getElementById('image-linter-main-window');
+						if ( lintDisplayWindow.style.visibility == 'visible' ) {
+							lintDisplayWindow.style.visibility = 'hidden';
+						} else {
+							const lintDisplayIframes = lintDisplayWindow.getElementsByTagName('iframe');
+							if(lintDisplayIframes.length == 0) {
+								var lintIframe = document.createElement('iframe');
+								lintIframe.setAttribute('src', '<?php echo add_query_arg( array( 'rt-script-optmizer-lint-image' => 1 ), esc_url( get_permalink() ) ); ?>');
+								lintDisplayWindow.append(lintIframe);
+								lintIframe.addEventListener('load', (ev) => {
+									const lintReport = ev.target.contentDocument.querySelector('.report');
+									if ( lintReport !== null && lintReport !== undefined ) {
+										const reportItems = lintReport.querySelectorAll('.report-item:not(.-passed)');
+										console.log(reportItems);
+									}
+								});
+							}
+							lintDisplayWindow.style.visibility = 'visible';
+						}
+
+					});
+				</script>
+
+				<?php
+
+				if ( isset( $_GET['rt-script-optmizer-lint-image'] ) ) {
+
+					?>
+
+						<script id="respimagelint-script" src="<?php echo esc_url( RT_SCRIPTS_OPTIMIZER_DIR_URL . '/respimagelint/dist/collector.js' ); ?>">
+
+					<?php
+
+				}
+		}
 }
 add_action( 'wp_footer', 'style_enqueue_script' );
 
@@ -377,6 +423,8 @@ function disable_emojis_remove_dns_prefetch( $urls, $relation_type ) {
  */
 function rt_scripts_optimizer_load_scripts() {
 
+	wp_enqueue_style( 'image-lint-window', RT_SCRIPTS_OPTIMIZER_DIR_URL . '/assets/css/image-lint-window.css', array(), filemtime( RT_SCRIPTS_OPTIMIZER_DIR_PATH . '/assets/css/image-lint-window.css' ) );
+
 	wp_enqueue_script( 'loadCSS', RT_SCRIPTS_OPTIMIZER_DIR_URL . '/assets/js/loadCSS.min.js', array(), filemtime( RT_SCRIPTS_OPTIMIZER_DIR_PATH . '/assets/js/loadCSS.min.js' ), false );
 
 }
@@ -418,3 +466,28 @@ function rt_scripts_optimizer_modify_embeds( $block_content, $block ) {
 }
 
 add_filter( 'render_block', 'rt_scripts_optimizer_modify_embeds', 10, 2 );
+
+add_action( 'admin_bar_menu', 'rt_scripts_optimizer_admin_bar', 500 );
+
+/**
+ * Register admin bar menus.
+ *
+ * @param WP_Admin_Bar $admin_bar Admin bar object.
+ */
+function rt_scripts_optimizer_admin_bar( $admin_bar ) {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	$admin_bar->add_menu(
+		array(
+			'id'     => 'lint-images',
+			'parent' => null,
+			'group'  => null,
+			'title'  => __( 'Lint Images', 'rt-scripts-optimizer' ),
+			'href'   => '#lint-images',
+			'meta'   => [
+				'title' => __( 'Lint all images of the page to check for any errors in image sizing.', 'rt-scripts-optimizer' ),
+			],
+		)
+	);
+}
