@@ -287,8 +287,7 @@ function style_enqueue_script() {
 								lintIframe.addEventListener('load', (ev) => {
 									const lintReport = ev.target.contentDocument.querySelector('.report');
 									if ( lintReport !== null && lintReport !== undefined ) {
-										const reportItems = lintReport.querySelectorAll('.report-item:not(.-passed)');
-										console.log(reportItems);
+										// If anything needed with the lint report markup.
 									}
 								});
 							}
