@@ -402,7 +402,7 @@ function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
 	);
 
 	foreach ( $iframes_to_lzay_load as $iframe_to_lzay_load ) {
-		$content = preg_replace( '~<iframe[^>]*\K (?=src=[^>]*('. $iframe_to_lzay_load .')[^>]*)~i', ' data-', $content, 1 );
+		$content = preg_replace( '~<iframe[^>]*\K (?=src=[^>]*('. $iframe_to_lzay_load .')[^>]*)~i', ' data-', $content );
 	}
 
 	return $content;
