@@ -393,8 +393,19 @@ add_action( 'wp_enqueue_scripts', 'rt_scripts_optimizer_load_scripts' );
  */
 function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
 
-	return preg_replace( '~<iframe[^>]*\K (?=src=)~i', ' data-', $content );
+	$iframes_to_lzay_load = array(
+		'youtube',
+		'vimeo',
+		'dailymotion',
+		'spotify',
+		// Add more video player whose iframe we src we need to set to `data-src` for lazy loading.
+	);
 
+	foreach ( $iframes_to_lzay_load as $iframe_to_lzay_load ) {
+		$content = preg_replace( '~<iframe[^>]*\K (?=src=[^>]*('. $iframe_to_lzay_load .')[^>]*)~i', ' data-', $content );
+	}
+
+	return $content;
 }
 
 add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_MAX );
