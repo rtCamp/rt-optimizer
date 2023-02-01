@@ -393,23 +393,18 @@ add_action( 'wp_enqueue_scripts', 'rt_scripts_optimizer_load_scripts' );
  */
 function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
 
-	// Find all the match of iframe and its related src attribute.
-	// To check iframe contains - youtube, vimeo, dailymotion etc.
-	preg_match_all('~<iframe[^>]+src="([^"]+)"~i', $content, $match );
+	$iframes_to_lzay_load = array(
+		'youtube',
+		'vimeo',
+		'dailymotion',
+		'spotify',
+		// Add more video player whose iframe we src we need to set to `data-src` for lazy loading.
+	);
 
-	if ( array_key_exists( '1', $match ) ) {
-		foreach ( $match[1] as $src ) {
-			if ( str_contains( $src, 'youtube' )
-				|| str_contains( $src, 'vimeo' )
-				|| str_contains( $src, 'dailymotion' )
-				// Add more video player whose iframe we src we need to set to `data-src` for lazy loading.
-			) {
-				// This is 1 time because if we found the match, Update 1 iframe only.
-				// For next iteration we can update other iframe.
-				$content = preg_replace( '~<iframe[^>]*\K (?=src=)~i', ' data-', $content, 1 );
-			}
-		}
+	foreach ( $iframes_to_lzay_load as $iframe_to_lzay_load ) {
+		$content = preg_replace( '~<iframe[^>]*\K (?=src=[^>]*('. $iframe_to_lzay_load .')[^>]*)~i', ' data-', $content, 1 );
 	}
+
 	return $content;
 }
 
