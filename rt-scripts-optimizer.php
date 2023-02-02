@@ -237,9 +237,10 @@ function style_enqueue_script() {
 				Array.from(iframes).forEach(function (el) {
 					iframesObserver.observe(el);
 				});
-				const tweets = document.getElementsByClassName('wp-block-embed-twitter');
-				const reddit = document.getElementsByClassName('wp-block-embed-reddit');
-				const scriptLoadedIframes = Array.from(tweets).concat( Array.from(reddit) );
+				const tweets    = document.getElementsByClassName('wp-block-embed-twitter');
+				const reddit    = document.getElementsByClassName('wp-block-embed-reddit');
+				const instagram = document.getElementsByClassName('wp-block-embed-instagram');
+				const scriptLoadedIframes = Array.from(tweets).concat( Array.from(reddit), Array.from(instagram) );
 				const scriptLoadedIframesObserver = new IntersectionObserver((entries, self) => {
 					entries.forEach((entry) => {
 						if(entry.isIntersecting) {
@@ -418,7 +419,7 @@ add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_M
  */
 function rt_scripts_optimizer_modify_embeds( $block_content, $block ) {
 
-	if ( 'core/embed' === $block['blockName'] && in_array( $block['attrs']['providerNameSlug'], [ 'reddit', 'twitter' ], true ) ) {
+	if ( 'core/embed' === $block['blockName'] && in_array( $block['attrs']['providerNameSlug'], [ 'reddit', 'twitter', 'instagram' ], true ) ) {
 
 		$block_content = preg_replace( '~<script~i', '<script type=\'text/rtscript-noautoload\'', $block_content );
 
