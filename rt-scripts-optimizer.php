@@ -237,9 +237,10 @@ function style_enqueue_script() {
 				Array.from(iframes).forEach(function (el) {
 					iframesObserver.observe(el);
 				});
-				const tweets = document.getElementsByClassName('wp-block-embed-twitter');
-				const reddit = document.getElementsByClassName('wp-block-embed-reddit');
-				const scriptLoadedIframes = Array.from(tweets).concat( Array.from(reddit) );
+				const tweets    = document.getElementsByClassName('wp-block-embed-twitter');
+				const reddit    = document.getElementsByClassName('wp-block-embed-reddit');
+				const instagram = document.getElementsByClassName('wp-block-embed-instagram');
+				const scriptLoadedIframes = Array.from(tweets).concat( Array.from(reddit), Array.from(instagram) );
 				const scriptLoadedIframesObserver = new IntersectionObserver((entries, self) => {
 					entries.forEach((entry) => {
 						if(entry.isIntersecting) {
@@ -393,8 +394,19 @@ add_action( 'wp_enqueue_scripts', 'rt_scripts_optimizer_load_scripts' );
  */
 function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
 
-	return preg_replace( '~<iframe[^>]*\K (?=src=)~i', ' data-', $content );
+	$iframes_to_lzay_load = array(
+		'youtube',
+		'vimeo',
+		'dailymotion',
+		'spotify',
+		// Add more video player whose iframe we src we need to set to `data-src` for lazy loading.
+	);
 
+	foreach ( $iframes_to_lzay_load as $iframe_to_lzay_load ) {
+		$content = preg_replace( '~<iframe[^>]*\K (?=src=[^>]*('. $iframe_to_lzay_load .')[^>]*)~i', ' data-', $content );
+	}
+
+	return $content;
 }
 
 add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_MAX );
@@ -407,7 +419,7 @@ add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_M
  */
 function rt_scripts_optimizer_modify_embeds( $block_content, $block ) {
 
-	if ( 'core/embed' === $block['blockName'] && in_array( $block['attrs']['providerNameSlug'], [ 'reddit', 'twitter' ], true ) ) {
+	if ( 'core/embed' === $block['blockName'] && in_array( $block['attrs']['providerNameSlug'], [ 'reddit', 'twitter', 'instagram' ], true ) ) {
 
 		$block_content = preg_replace( '~<script~i', '<script type=\'text/rtscript-noautoload\'', $block_content );
 
