@@ -14,18 +14,85 @@ function rt_settings_init() {
 
 	// Register new setting options.
 	$script_settings = [
-		'rt_scripts_optimizer_exclude_paths',
-		'rt_scripts_optimizer_exclude_handles',
-		'rt_scripts_optimizer_style_dequeue_non_logged_handles',
-		'rt_scripts_optimizer_style_async_handles',
-		'rt_scripts_optimizer_style_async_handles_onevent',
-		'rt_scripts_optimizer_load_amp_boilerplate_style',
-		'rt_scripts_optimizer_skip_css_concatination_all',
-		'rt_scripts_optimizer_skip_css_concatination_handles'
+		'rt_scripts_optimizer_exclude_paths'                    => [
+			'id'       => 'rt_scripts_optimizer_path_field',
+			'title'    => __( 'Load js normally by adding script path here', 'RT_Script_Optimizer' ),
+			'callback' => 'rt_scripts_optimizer_paths_field_callback',
+			'page'     => 'rt-scripts-optimizer-settings',
+			'section'  => 'rt_scripts_optimizer_settings_section'
+		],
+		'rt_scripts_optimizer_exclude_handles'                  => [
+			'id'       => 'rt_scripts_optimizer_handle_field',
+			'title'    => __( 'Load js normally by adding script handles', 'RT_Script_Optimizer' ),
+			'callback' => 'rt_scripts_optimizer_handles_field_callback',
+			'page'     => 'rt-scripts-optimizer-settings',
+			'section'  => 'rt_scripts_optimizer_settings_section'
+		],
+		'rt_scripts_optimizer_style_dequeue_non_logged_handles' => [
+			'id'       => 'rt_scripts_optimizer_style_dequeue_non_logged_handles',
+			'title'    => __( 'CSS handles of the stylesheets which should not be loaded if user not logged in', 'RT_Script_Optimizer' ),
+			'callback' => 'rt_scripts_optimizer_style_dequeue_non_logged_handles_callback',
+			'page'     => 'rt-scripts-optimizer-settings',
+			'section'  => 'rt_scripts_optimizer_settings_section'
+		],
+		'rt_scripts_optimizer_style_async_handles'              => [
+			'id'       => 'rt_scripts_optimizer_style_async_handles',
+			'title'    => __( 'CSS handles of the stylesheets which should be asynchronously loaded', 'RT_Script_Optimizer' ),
+			'callback' => 'rt_scripts_optimizer_style_async_handles_callback',
+			'page'     => 'rt-scripts-optimizer-settings',
+			'section'  => 'rt_scripts_optimizer_settings_section'
+		],
+		'rt_scripts_optimizer_style_async_handles_onevent'      => [
+			'id'       => 'rt_scripts_optimizer_style_async_handles_onevent',
+			'title'    => __( 'CSS handles of the stylesheets which should be asynchronously loaded on any window event', 'RT_Script_Optimizer' ),
+			'callback' => 'rt_scripts_optimizer_style_async_handles_onevent_callback',
+			'page'     => 'rt-scripts-optimizer-settings',
+			'section'  => 'rt_scripts_optimizer_settings_section'
+		],
+		'rt_scripts_optimizer_load_amp_boilerplate_style'       => [
+			'id'       => 'rt_scripts_optimizer_load_amp_boilerplate_style',
+			'title'    => __( 'Load AMP boilerplate CSS', 'RT_Script_Optimizer' ),
+			'callback' => 'rt_scripts_optimizer_load_amp_boilerplate_style_callback',
+			'page'     => 'rt-scripts-optimizer-settings',
+			'section'  => 'rt_scripts_optimizer_settings_section'
+		],
+		'rt_scripts_optimizer_skip_css_concatination_all'       => [
+			'id'       => 'rt_scripts_optimizer_skip_css_concatination_all',
+			'title'    => __( 'Skip all CSS concatination', 'RT_Script_Optimizer' ),
+			'callback' => 'rt_scripts_optimizer_skip_css_concatination_all_callback',
+			'page'     => 'rt-scripts-optimizer-settings',
+			'section'  => 'rt_scripts_optimizer_settings_section'
+		],
+		'rt_scripts_optimizer_skip_css_concatination_handles'   => [
+			'id'       => 'rt_scripts_optimizer_skip_css_concatination_handles',
+			'title'    => __( 'Skip CSS concatination for these handles', 'RT_Script_Optimizer' ),
+			'callback' => 'rt_scripts_optimizer_skip_css_concatination_handles_callback',
+			'page'     => 'rt-scripts-optimizer-settings',
+			'section'  => 'rt_scripts_optimizer_settings_section'
+		]
 	];
 
-	foreach ( $script_settings as $setting ) {
-		register_setting( 'rt-scripts-optimizer-settings', $setting );
+	/**
+	 * Add fields from settings array to following core functions.
+	 * 
+	 * add_settings_field( $id, $title, $callback, $page, $section )
+	 * - https://developer.wordpress.org/reference/functions/add_settings_field/
+	 * 
+	 * register_setting( $option_group, $option_name )
+	 * - https://developer.wordpress.org/reference/functions/register_setting/
+	 * 
+	 */
+	foreach ( $script_settings as $option_name => $settings ) {
+
+		add_settings_field(
+			$settings[ 'id' ],
+			$settings[ 'title' ],
+			$settings[ 'callback' ],
+			$settings[ 'page' ],
+			$settings[ 'page' ]
+		);
+
+		register_setting( 'rt-scripts-optimizer-settings', $option_name );
 	}
 
 	// Register a new section.
@@ -36,77 +103,6 @@ function rt_settings_init() {
 		'rt-scripts-optimizer-settings'                                     // Page.
 	);
 
-	// Register a new field to fetch paths of scripts to exclude.
-	add_settings_field(
-		'rt_scripts_optimizer_path_field',                              // As of WP 4.6 this value is used only internally.
-		__( 'Load js normally by adding script path here', 'RT_Script_Optimizer' ),                    // Title.
-		'rt_scripts_optimizer_paths_field_callback',                    // Callback Function.
-		'rt-scripts-optimizer-settings',                                // Page.
-		'rt_scripts_optimizer_settings_section'                         // Section.
-	);
-
-	// Register a new field to fetch handles of scripts to exclude.
-	add_settings_field(
-		'rt_scripts_optimizer_handle_field',                            // As of WP 4.6 this value is used only internally.
-		__( 'Load js normally by adding script handles', 'RT_Script_Optimizer' ),                  // Title.
-		'rt_scripts_optimizer_handles_field_callback',                  // Callback Function.
-		'rt-scripts-optimizer-settings',                                // Page.
-		'rt_scripts_optimizer_settings_section'                         // Section.
-	);
-
-	// Register a new field to fetch handles of styles to be dequeued for non-logged in users.
-	add_settings_field(
-		'rt_scripts_optimizer_style_dequeue_non_logged_handles',                            // As of WP 4.6 this value is used only internally.
-		__( 'CSS handles of the stylesheets which should not be loaded if user not logged in', 'RT_Script_Optimizer' ),                  // Title.
-		'rt_scripts_optimizer_style_dequeue_non_logged_handles_callback',                  // Callback Function.
-		'rt-scripts-optimizer-settings',                                // Page.
-		'rt_scripts_optimizer_settings_section'                         // Section.
-	);
-
-	// Register a new field to fetch handles of styles to be loaded async.
-	add_settings_field(
-		'rt_scripts_optimizer_style_async_handles',                            // As of WP 4.6 this value is used only internally.
-		__( 'CSS handles of the stylesheets which should be asynchronously loaded', 'RT_Script_Optimizer' ),                  // Title.
-		'rt_scripts_optimizer_style_async_handles_callback',                  // Callback Function.
-		'rt-scripts-optimizer-settings',                                // Page.
-		'rt_scripts_optimizer_settings_section'                         // Section.
-	);
-
-	// Register a new field to fetch handles of styles to be loaded on any window event.
-	add_settings_field(
-		'rt_scripts_optimizer_style_async_handles_onevent',                            // As of WP 4.6 this value is used only internally.
-		__( 'CSS handles of the stylesheets which should be asynchronously loaded on any window event', 'RT_Script_Optimizer' ),                  // Title.
-		'rt_scripts_optimizer_style_async_handles_onevent_callback',                  // Callback Function.
-		'rt-scripts-optimizer-settings',                                // Page.
-		'rt_scripts_optimizer_settings_section'                         // Section.
-	);
-
-	// Register a new field to fetch option whether to load amp-boilerplate style.
-	add_settings_field(
-		'rt_scripts_optimizer_load_amp_boilerplate_style',                            // As of WP 4.6 this value is used only internally.
-		__( 'Load AMP boilerplate CSS', 'RT_Script_Optimizer' ),                  // Title.
-		'rt_scripts_optimizer_load_amp_boilerplate_style_callback',                  // Callback Function.
-		'rt-scripts-optimizer-settings',                                // Page.
-		'rt_scripts_optimizer_settings_section'                         // Section.
-	);
-
-	// Register a new field to fetch option whether to skip all CSS concatination.
-	add_settings_field(
-		'rt_scripts_optimizer_skip_css_concatination_all',                            // As of WP 4.6 this value is used only internally.
-		__( 'Skip all CSS concatination', 'RT_Script_Optimizer' ),                  // Title.
-		'rt_scripts_optimizer_skip_css_concatination_all_callback',                  // Callback Function.
-		'rt-scripts-optimizer-settings',                                // Page.
-		'rt_scripts_optimizer_settings_section'                         // Section.
-	);
-
-	// Register a new field to fetch handles of stylesheets which are not to be concated.
-	add_settings_field(
-		'rt_scripts_optimizer_skip_css_concatination_handles',                            // As of WP 4.6 this value is used only internally.
-		__( 'Skip CSS concatination for these handles', 'RT_Script_Optimizer' ),                  // Title.
-		'rt_scripts_optimizer_skip_css_concatination_handles_callback',                  // Callback Function.
-		'rt-scripts-optimizer-settings',                                // Page.
-		'rt_scripts_optimizer_settings_section'                         // Section.
-	);
 }
 
 /**
