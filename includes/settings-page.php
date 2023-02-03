@@ -13,14 +13,20 @@
 function rt_settings_init() {
 
 	// Register new setting options.
-	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_exclude_paths' );
-	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_exclude_handles' );
-	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_style_dequeue_non_logged_handles' );
-	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_style_async_handles' );
-	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_style_async_handles_onevent' );
-	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_load_amp_boilerplate_style' );
-	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_skip_css_concatination_all' );
-	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_skip_css_concatination_handles' );
+	$script_settings = [
+		'rt_scripts_optimizer_exclude_paths',
+		'rt_scripts_optimizer_exclude_handles',
+		'rt_scripts_optimizer_style_dequeue_non_logged_handles',
+		'rt_scripts_optimizer_style_async_handles',
+		'rt_scripts_optimizer_style_async_handles_onevent',
+		'rt_scripts_optimizer_load_amp_boilerplate_style',
+		'rt_scripts_optimizer_skip_css_concatination_all',
+		'rt_scripts_optimizer_skip_css_concatination_handles'
+	];
+
+	foreach ( $script_settings as $setting ) {
+		register_setting( 'rt-scripts-optimizer-settings', $setting );
+	}
 
 	// Register a new section.
 	add_settings_section(
