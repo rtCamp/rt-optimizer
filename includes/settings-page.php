@@ -89,7 +89,7 @@ function rt_settings_init() {
 			$settings[ 'title' ],
 			$settings[ 'callback' ],
 			$settings[ 'page' ],
-			$settings[ 'page' ]
+			$settings[ 'section' ]
 		);
 
 		register_setting( 'rt-scripts-optimizer-settings', $option_name );
