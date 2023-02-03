@@ -98,7 +98,7 @@ function rt_settings_init() {
 	// Register a new section.
 	add_settings_section(
 		'rt_scripts_optimizer_settings_section',                            // ID.
-		__( 'RT Scripts Optimizer Settings', 'RT_Script_Optimizer' ),        // Title.
+		__( 'RT Scripts Optimizer Settings', 'RT_Script_Optimizer' ),       // Title.
 		'rt_scripts_optimizer_settings_callback',                           // Callback Function.
 		'rt-scripts-optimizer-settings'                                     // Page.
 	);
