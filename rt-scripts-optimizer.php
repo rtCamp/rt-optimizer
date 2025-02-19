@@ -214,7 +214,7 @@ function style_enqueue_script() {
 	}
 	?>
 		<script type="text/javascript">
-			const s_i_e=["mouseover","keydown","touchmove","touchstart","scroll"];function s_i_e_e(){s_i(),s_i_e.forEach(function(e){window.removeEventListener(e,s_i_e_e,{passive:!0})})}function s_i_rti(e){loadCSS(e.href),e.href||s_i_e_e()}function s_i(){var e=document.querySelectorAll("link");[].forEach.call(e,function(e){"rt-optimized-onevent-stylesheet"==e.getAttribute("rel")&&s_i_rti(e)})}s_i_e.forEach(function(e){window.addEventListener(e,s_i_e_e,{passive:!0})}),function(){var e=document.querySelectorAll("link");[].forEach.call(e,function(e){"rt-optimized-stylesheet"==e.getAttribute("rel")&&loadCSS(e.href)})}();
+			const s_i_e=["mousemove","keydown","touchmove","touchstart","scroll"];function s_i_e_e(){s_i(),s_i_e.forEach(function(e){window.removeEventListener(e,s_i_e_e,{passive:!0})})}function s_i_rti(e){loadCSS(e.href),e.href||s_i_e_e()}function s_i(){var e=document.querySelectorAll("link");[].forEach.call(e,function(e){"rt-optimized-onevent-stylesheet"==e.getAttribute("rel")&&s_i_rti(e)})}s_i_e.forEach(function(e){window.addEventListener(e,s_i_e_e,{passive:!0})}),function(){var e=document.querySelectorAll("link");[].forEach.call(e,function(e){"rt-optimized-stylesheet"==e.getAttribute("rel")&&loadCSS(e.href)})}();
 		</script>
 
 		<script type="text/javascript">
