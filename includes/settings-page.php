@@ -118,7 +118,7 @@ function rt_settings_init()
 	// Register a new field to fetch option whether to skip all CSS concatination.
 	add_settings_field(
 		'rt_scripts_optimizer_skip_css_concatination_all',
-		__('Skip all CSS concatination', 'RT_Script_Optimizer'),
+		__('Skip all CSS concatenation', 'RT_Script_Optimizer'),
 		'rt_scripts_optimizer_skip_css_concatination_all_callback',
 		'rt-scripts-optimizer-settings',
 		'rt_scripts_optimizer_css_settings_section'
@@ -127,7 +127,7 @@ function rt_settings_init()
 	// Register a new field to fetch handles of stylesheets which are not to be concated.
 	add_settings_field(
 		'rt_scripts_optimizer_skip_css_concatination_handles',
-		__('Skip CSS concatination for these handles', 'RT_Script_Optimizer'),
+		__('Skip CSS concatenation for these handles', 'RT_Script_Optimizer'),
 		'rt_scripts_optimizer_skip_css_concatination_handles_callback',
 		'rt-scripts-optimizer-settings',
 		'rt_scripts_optimizer_css_settings_section'
@@ -320,7 +320,7 @@ function rt_scripts_optimizer_skip_css_concatination_all_callback($args)
 	<br>
 
 	<p class='description'>
-		<?php esc_html_e('Check this if you want to disable CSS concatination completely. If this is checked then the below field have no effect.', 'RT_Script_Optimizer'); ?>
+		<?php esc_html_e('Check this if you want to disable CSS concatenation completely. If this is checked then the below field have no effect.', 'RT_Script_Optimizer'); ?>
 	</p>
 <?php
 }
@@ -346,7 +346,7 @@ function rt_scripts_optimizer_skip_css_concatination_handles_callback($args)
 	<br>
 
 	<p class='description'>
-		<?php esc_html_e('Disable CSS concatination of the supplied handles. If the skip all concatination checkbox is checked then these values will have no effect.', 'RT_Script_Optimizer'); ?>
+		<?php esc_html_e('Disable CSS concatenation of the supplied handles. If the skip all concatenation checkbox is checked then these values will have no effect.', 'RT_Script_Optimizer'); ?>
 	</p>
 <?php
 }

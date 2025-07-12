@@ -48,7 +48,7 @@ function rt_head_scripts()
 		return null;
 	}
 
-	if ('1' !== get_option('rt_scripts_optimizer_disable_js_optimizations')) {
+	if ('1' !== get_option('rt_scripts_optimizer_disable_js_optimizations', '1')) {
 ?>
 		<script type="text/worker" id="rtpwa">onmessage=function(e){var o=new Request(e.data,{mode:"no-cors",redirect:"follow"});fetch(o)};</script>
 		<script type="text/javascript">
@@ -57,9 +57,9 @@ function rt_head_scripts()
 	<?php
 	}
 
-	$load_amp_css = get_option('rt_scripts_optimizer_load_amp_boilerplate_style');
+	$load_amp_css = get_option('rt_scripts_optimizer_load_amp_boilerplate_style', '0');
 
-	if ('1' === $load_amp_css && '1' !== get_option('rt_scripts_optimizer_disable_css_optimizations')) {
+	if ('1' === $load_amp_css && '1' !== get_option('rt_scripts_optimizer_disable_css_optimizations', '1')) {
 	?>
 		<!-- Load the amp-boiler plate to show content after 0.5 seconds. Helps with CLS issue. Use selector (.site-content) of the content area after your <header> tag, so header displays always. -->
 		<style amp-boilerplate>
@@ -155,7 +155,7 @@ function rt_footer_scripts()
 		return null;
 	}
 
-	if ('1' === get_option('rt_scripts_optimizer_disable_js_optimizations')) {
+	if ('1' === get_option('rt_scripts_optimizer_disable_js_optimizations', '1')) {
 		return;
 	}
 	?>
@@ -265,7 +265,7 @@ add_action('wp_footer', 'rt_footer_scripts');
 function rt_scripts_handler($tag, $handle, $src)
 {
 
-	if ('1' === get_option('rt_scripts_optimizer_disable_js_optimizations')) {
+	if ('1' === get_option('rt_scripts_optimizer_disable_js_optimizations', '1')) {
 		return $tag;
 	}
 
@@ -288,8 +288,8 @@ function rt_scripts_handler($tag, $handle, $src)
 		return $tag;
 	}
 
-	$handles_option_array = explode(',', get_option('rt_scripts_optimizer_exclude_handles', ''));
-	$paths_option_array   = explode(',', get_option('rt_scripts_optimizer_exclude_paths', ''));
+	$handles_option_array = array_filter(explode(',', get_option('rt_scripts_optimizer_exclude_handles', '')));
+	$paths_option_array   = array_filter(explode(',', get_option('rt_scripts_optimizer_exclude_paths', '')));
 
 	// Get handle using the paths provided in the settings.
 	foreach ($paths_option_array as $script_path) {
@@ -339,7 +339,7 @@ add_filter('script_loader_tag', 'rt_scripts_handler', 10, 3);
 function load_async_styles($html, $handle)
 {
 
-	if ('1' === get_option('rt_scripts_optimizer_disable_css_optimizations')) {
+	if ('1' === get_option('rt_scripts_optimizer_disable_css_optimizations', '1')) {
 		return $html;
 	}
 
@@ -374,12 +374,12 @@ function load_async_styles($html, $handle)
 		return $async_html;
 	}
 
-	$async_js_loading = array(); // The above array can be used here also but that will cause FOUT as this script is included in the footer from where the CSS is loaded.
-	if (! is_admin() && in_array($handle, $async_js_loading, true)) {
-		$async_html  = str_replace('rel=\'stylesheet\'', 'rel=\'rt-optimized-stylesheet\'', $html);
-		$async_html .= sprintf('<noscript>%s</noscript>', $html);
-		return $async_html;
-	}
+	// $async_js_loading = array(); // The above array can be used here also but that will cause FOUT as this script is included in the footer from where the CSS is loaded.
+	// if (! is_admin() && in_array($handle, $async_js_loading, true)) {
+	// 	$async_html  = str_replace('rel=\'stylesheet\'', 'rel=\'rt-optimized-stylesheet\'', $html);
+	// 	$async_html .= sprintf('<noscript>%s</noscript>', $html);
+	// 	return $async_html;
+	// }
 
 	$optimized_loading = explode(',', get_option('rt_scripts_optimizer_style_async_handles_onevent', ''));
 	if (! is_admin() && in_array($handle, $optimized_loading, true)) {
@@ -401,8 +401,8 @@ function style_enqueue_script()
 		return null;
 	}
 
-	$disable_css_optimizations = '1' === get_option('rt_scripts_optimizer_disable_css_optimizations');
-	$disable_js_optimizations  = '1' === get_option('rt_scripts_optimizer_disable_js_optimizations');
+	$disable_css_optimizations = '1' === get_option('rt_scripts_optimizer_disable_css_optimizations', '1');
+	$disable_js_optimizations  = '1' === get_option('rt_scripts_optimizer_disable_js_optimizations', '1');
 
 	if (! $disable_css_optimizations) {
 	?>
@@ -501,7 +501,7 @@ add_action('wp_footer', 'style_enqueue_script');
 function dequeue_styles()
 {
 
-	if ('1' === get_option('rt_scripts_optimizer_disable_css_optimizations')) {
+	if ('1' === get_option('rt_scripts_optimizer_disable_css_optimizations', '1')) {
 		return;
 	}
 
@@ -562,8 +562,8 @@ function skip_css_concatination($do_concat, $handle)
 /**
  * Disable concatination according to the supplied setting.
  */
-if ('1' !== get_option('rt_scripts_optimizer_disable_css_optimizations')) {
-	if ('1' === get_option('rt_scripts_optimizer_skip_css_concatination_all')) {
+if ('1' !== get_option('rt_scripts_optimizer_disable_css_optimizations', '1')) {
+	if ('1' === get_option('rt_scripts_optimizer_skip_css_concatination_all', '0')) {
 
 		add_filter('css_do_concat', '__return_false');
 	} else {
@@ -614,7 +614,7 @@ function disable_emojis_remove_dns_prefetch($urls, $relation_type)
 function rt_scripts_optimizer_load_scripts()
 {
 
-	if ('1' === get_option('rt_scripts_optimizer_disable_css_optimizations')) {
+	if ('1' === get_option('rt_scripts_optimizer_disable_css_optimizations', '1')) {
 		return;
 	}
 
@@ -637,7 +637,7 @@ function rt_scripts_optimizer_iframe_lazy_loading($content)
 	return preg_replace('~<iframe[^>]*\K (?=src=)~i', ' data-', $content);
 }
 
-if ('1' !== get_option('rt_scripts_optimizer_disable_js_optimizations')) {
+if ('1' !== get_option('rt_scripts_optimizer_disable_js_optimizations', '1')) {
 	add_action('the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_MAX);
 }
 
@@ -658,6 +658,6 @@ function rt_scripts_optimizer_modify_embeds($block_content, $block)
 	return $block_content;
 }
 
-if ('1' !== get_option('rt_scripts_optimizer_disable_js_optimizations')) {
+if ('1' !== get_option('rt_scripts_optimizer_disable_js_optimizations', '1')) {
 	add_filter('render_block', 'rt_scripts_optimizer_modify_embeds', 10, 2);
 }
