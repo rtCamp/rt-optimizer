@@ -43,7 +43,7 @@ function rt_scripts_optimizer_check_disabled_page_ids( $disable ) {
 		return $disable;
 	}
 	
-	// Get current page/post ID.
+	// Get current page/post ID - works earlier in WordPress lifecycle than $post global
 	$current_id = get_the_ID();
 	
 	// If no current ID found, return current status.
@@ -74,28 +74,56 @@ function rt_scripts_optimizer_check_disabled_page_ids( $disable ) {
 // This must be registered before any apply_filters() calls.
 add_filter( 'disable_rt_scripts_optimizer', 'rt_scripts_optimizer_check_disabled_page_ids', 5 );
 
-// Skip if it is WP Backend.
-if ( is_admin() ) {
-	return;
-}
-
 /**
- * Checks if the plugin has to be disabled.
- *
- * Return true if it has to be disabled.
- *
- * @return bool.
+ * Initialize plugin on 'wp' hook - after post/page data is loaded.
  */
-$disable_rt_optimzer = apply_filters( 'disable_rt_scripts_optimizer', false );
+function rt_scripts_optimizer_init() {
+	// Skip if it is WP Backend.
+	if ( is_admin() ) {
+		return;
+	}
 
-if ( $disable_rt_optimzer ) {
-	return;
+	/**
+	 * Checks if the plugin has to be disabled.
+	 *
+	 * Return true if it has to be disabled.
+	 *
+	 * @return bool.
+	 */
+	$disable_rt_optimzer = apply_filters( 'disable_rt_scripts_optimizer', false );
+
+	if ( $disable_rt_optimzer ) {
+		return;
+	}
+
+	// Skip if it is customizer preview.
+	if ( isset( $_REQUEST['customize_changeset_uuid'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return;
+	}
+
+	// Register all hooks
+	add_action( 'wp_head', 'rt_head_scripts', 0 );
+	add_action( 'wp_footer', 'rt_footer_scripts' );
+	add_filter( 'script_loader_tag', 'rt_scripts_handler', 10, 3 );
+	add_filter( 'style_loader_tag', 'load_async_styles', 10, 2 );
+	add_action( 'wp_footer', 'style_enqueue_script' );
+	add_action( 'wp_print_styles', 'dequeue_styles' );
+	add_filter( 'js_do_concat', '__return_false' );
+	
+	if ( '1' === get_option( 'rt_scripts_optimizer_skip_css_concatination_all' ) ) {
+		add_filter( 'css_do_concat', '__return_false' );
+	} else {
+		add_filter( 'css_do_concat', 'skip_css_concatination', 10, 2 );
+	}
+	
+	add_action( 'init', 'disable_emojis' );
+	add_action( 'wp_enqueue_scripts', 'rt_scripts_optimizer_load_scripts' );
+	add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_MAX );
+	add_filter( 'render_block', 'rt_scripts_optimizer_modify_embeds', 10, 2 );
 }
 
-// Skip if it is customizer preview.
-if ( isset( $_REQUEST['customize_changeset_uuid'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	return;
-}
+// Hook to 'wp' action - runs after post/page is loaded
+add_action( 'wp', 'rt_scripts_optimizer_init' );
 
 // Variable to store the scripts to be excluded.
 $skip_js = array(
@@ -104,6 +132,7 @@ $skip_js = array(
 	'wp-hooks',
 	'wp-i18n',
 );
+
 /**
  * Head scripts
  */
@@ -130,7 +159,6 @@ function rt_head_scripts() {
 		<?php
 	}
 }
-add_action( 'wp_head', 'rt_head_scripts', 0 );
 
 /**
  * Footer scripts
@@ -145,7 +173,6 @@ function rt_footer_scripts() {
 		<script type="text/javascript">const t = ["mouseover", "keydown", "touchmove", "touchstart", "scroll"]; t.forEach(function (t) { window.addEventListener(t, e, { passive: true }) }); function e() { n(); t.forEach(function (t) { window.removeEventListener(t, e, { passive: true }) }) } function c(t, e, n) { if (typeof n === "undefined") { n = 0 } t[n](function () { n++; if (n === t.length) { e() } else { c(t, e, n) } }) } function u() { var t = document.createEvent("Event"); t.initEvent("DOMContentLoaded", true, true); window.dispatchEvent(t); document.dispatchEvent(t); var e = document.createEvent("Event"); e.initEvent("readystatechange", true, true); window.dispatchEvent(e); document.dispatchEvent(e); var n = document.createEvent("Event"); n.initEvent("load", true, true); window.dispatchEvent(n); document.dispatchEvent(n); var o = document.createEvent("Event"); o.initEvent("show", true, true); window.dispatchEvent(o); document.dispatchEvent(o); var c = window.document.createEvent("UIEvents"); c.initUIEvent("resize", true, true, window, 0); window.dispatchEvent(c); document.dispatchEvent(c); } function rti(t, e) { var n = document.createElement("script"); n.type = "text/javascript"; if (t.src) { n.onload = e; n.onerror = e; n.src = t.src; n.id = t.id } else { n.textContent = t.innerText; n.id = t.id } t.parentNode.removeChild(t); document.body.appendChild(n); if (!t.src) { e() } } function n() { var t = document.querySelectorAll("script"); var n = []; var o;[].forEach.call(t, function (e) { o = e.getAttribute("type"); if (o == "text/rtscript") { n.push(function (t) { rti(e, t) }) } }); c(n, u) }</script>
 	<?php
 }
-add_action( 'wp_footer', 'rt_footer_scripts' );
 
 /**
  * Setting up scripts id and type attribute to identify which scripts to offload to worker thread and reduce main thread execution on load.
@@ -207,8 +234,6 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 	return $tag;
 
 }
-add_filter( 'script_loader_tag', 'rt_scripts_handler', 10, 3 );
-
 /**
  * Loads the specified stylesheets asynchronously.
  *
@@ -244,8 +269,6 @@ function load_async_styles( $html, $handle ) {
 	}
 	return $html;
 }
-add_filter( 'style_loader_tag', 'load_async_styles', 10, 2 );
-
 /**
  * Add script to include stylesheets on demand.
  */
@@ -308,8 +331,6 @@ function style_enqueue_script() {
 		</script>
 	<?php
 }
-add_action( 'wp_footer', 'style_enqueue_script' );
-
 /**
  * Dequeues unnecessary styles.
  */
@@ -329,12 +350,10 @@ function dequeue_styles() {
 		}
 	}
 }
-add_action( 'wp_print_styles', 'dequeue_styles' );
 
 /**
  * Remove concating all js if site is using nginx-http plugin for files concatination or site is hosted on WordPress VIP.
  */
-add_filter( 'js_do_concat', '__return_false' );
 
 /**
  * Skips CSS concatination for handles specified in the option `rt_scripts_optimizer_skip_css_concatination_handles`.
@@ -358,15 +377,6 @@ function skip_css_concatination( $do_concat, $handle ) {
 /**
  * Disable concatination according to the supplied setting.
  */
-if ( '1' === get_option( 'rt_scripts_optimizer_skip_css_concatination_all' ) ) {
-
-	add_filter( 'css_do_concat', '__return_false' );
-
-} else {
-
-	add_filter( 'css_do_concat', 'skip_css_concatination', 10, 2 );
-
-}
 
 /**
  * Disable the emojis.
@@ -381,7 +391,6 @@ function disable_emojis() {
 	remove_filter( 'wp_mail', 'wp_staticize_emoji_for_email' );
 	add_filter( 'wp_resource_hints', 'disable_emojis_remove_dns_prefetch', 10, 2 );
 }
-add_action( 'init', 'disable_emojis' );
 
 /**
  * Remove emoji CDN hostname from DNS prefetching hints.
@@ -410,7 +419,6 @@ function rt_scripts_optimizer_load_scripts() {
 	wp_enqueue_script( 'loadCSS', RT_SCRIPTS_OPTIMIZER_DIR_URL . '/assets/js/loadCSS.min.js', array(), filemtime( RT_SCRIPTS_OPTIMIZER_DIR_PATH . '/assets/js/loadCSS.min.js' ), false );
 
 }
-add_action( 'wp_enqueue_scripts', 'rt_scripts_optimizer_load_scripts' );
 
 /**
  * Rename src attribute of iframes to block them from automatically loading on page load.
@@ -438,8 +446,6 @@ function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
 	return $content;
 }
 
-add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_MAX );
-
 /**
  * Modifies output of some of the embed blocks.
  *
@@ -457,5 +463,3 @@ function rt_scripts_optimizer_modify_embeds( $block_content, $block ) {
 	return $block_content;
 
 }
-
-add_filter( 'render_block', 'rt_scripts_optimizer_modify_embeds', 10, 2 );
