@@ -43,8 +43,8 @@ function rt_scripts_optimizer_check_disabled_page_ids( $disable ) {
 		return $disable;
 	}
 	
-	// Get current page/post ID - works earlier in WordPress lifecycle than $post global
-	$current_id = get_the_ID();
+	// Get current page/post ID - get_queried_object_id() works reliably with 'wp' hook
+	$current_id = get_queried_object_id();
 	
 	// If no current ID found, return current status.
 	if ( ! $current_id ) {
