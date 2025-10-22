@@ -21,6 +21,7 @@ function rt_settings_init() {
 	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_load_amp_boilerplate_style' );
 	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_skip_css_concatination_all' );
 	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_skip_css_concatination_handles' );
+	register_setting( 'rt-scripts-optimizer-settings', 'rt_scripts_optimizer_disabled_page_ids' );
 
 	// Register a new section.
 	add_settings_section(
@@ -98,6 +99,15 @@ function rt_settings_init() {
 		'rt_scripts_optimizer_skip_css_concatination_handles',                            // As of WP 4.6 this value is used only internally.
 		__( 'Skip CSS concatination for these handles', 'RT_Script_Optimizer' ),                  // Title.
 		'rt_scripts_optimizer_skip_css_concatination_handles_callback',                  // Callback Function.
+		'rt-scripts-optimizer-settings',                                // Page.
+		'rt_scripts_optimizer_settings_section'                         // Section.
+	);
+
+	// Register a new field to fetch page IDs where the plugin should be disabled.
+	add_settings_field(
+		'rt_scripts_optimizer_disabled_page_ids',                            // As of WP 4.6 this value is used only internally.
+		__( 'Disable plugin for specific page IDs', 'RT_Script_Optimizer' ),                  // Title.
+		'rt_scripts_optimizer_disabled_page_ids_callback',                  // Callback Function.
 		'rt-scripts-optimizer-settings',                                // Page.
 		'rt_scripts_optimizer_settings_section'                         // Section.
 	);
@@ -290,6 +300,33 @@ function rt_scripts_optimizer_skip_css_concatination_handles_callback( $args ) {
 
 	<p class='description'>
 		<?php esc_html_e( 'Disable CSS concatination of the supplied handles. If the skip all concatination checkbox is checked then these values will have no effect.', 'RT_Script_Optimizer' ); ?>
+	</p>
+	<?php
+}
+
+/**
+ * Field callback to accept page IDs where the plugin should be disabled.
+ *
+ * @param array $args arguments passed.
+ */
+function rt_scripts_optimizer_disabled_page_ids_callback( $args ) {
+
+	// option value.
+	$page_ids = get_option( 'rt_scripts_optimizer_disabled_page_ids' );
+	?>
+
+	<input type="text"
+		id="rt_optimizer_disabled_page_ids"
+		name="rt_scripts_optimizer_disabled_page_ids"
+		value="<?php echo esc_attr( $page_ids ); ?>"
+		style="width:80%;"
+		placeholder="1,2,3,4"
+	>
+
+	<br>
+
+	<p class='description'>
+		<?php esc_html_e( 'Enter comma-separated page/post IDs where RT Scripts Optimizer should be disabled. Example: 123,456,789', 'RT_Script_Optimizer' ); ?>
 	</p>
 	<?php
 }

@@ -19,8 +19,76 @@ define( 'RT_SCRIPTS_OPTIMIZER_DIR_URL', untrailingslashit( plugin_dir_url( __FIL
 // Include settings options page.
 require_once RT_SCRIPTS_OPTIMIZER_DIR_PATH . '/includes/settings-page.php';
 
+/**
+ * Checks if the current page/post ID is in the disabled page IDs list.
+ *
+ * This function hooks into the 'disable_rt_scripts_optimizer' filter to disable
+ * the plugin for specific page/post IDs provided by the user in CSV format.
+ *
+ * @param bool $disable Current disable status.
+ * @return bool True if plugin should be disabled for current page, false otherwise.
+ */
+function rt_scripts_optimizer_check_disabled_page_ids( $disable ) {
+
+	// If already disabled, return early.
+	if ( $disable ) {
+		return $disable;
+	}
+	
+	// Get the disabled page IDs setting.
+	$disabled_page_ids = get_option( 'rt_scripts_optimizer_disabled_page_ids', '' );
+	
+	// If no disabled page IDs are set, return current status.
+	if ( empty( $disabled_page_ids ) ) {
+		return $disable;
+	}
+	
+	// Get current page/post ID.
+	$current_id = get_the_ID();
+	
+	// If no current ID found, return current status.
+	if ( ! $current_id ) {
+		return $disable;
+	}
+	
+	// Convert CSV string to array and trim whitespace.
+	$disabled_ids_array = array_map( 'trim', explode( ',', $disabled_page_ids ) );
+	
+	// Remove empty values and non-numeric values from array.
+	$disabled_ids_array = array_filter( $disabled_ids_array, function( $value ) {
+		return ! empty( $value ) && is_numeric( $value ) && intval( $value ) > 0;
+	} );
+	
+	// Convert to integers for comparison.
+	$disabled_ids_array = array_map( 'intval', $disabled_ids_array );
+	
+	// Check if current page ID is in the disabled list.
+	if ( in_array( $current_id, $disabled_ids_array, true ) ) {
+		return true;
+	}
+	
+	return $disable;
+}
+
+// Hook the function to the disable filter with high priority to run early.
+// This must be registered before any apply_filters() calls.
+add_filter( 'disable_rt_scripts_optimizer', 'rt_scripts_optimizer_check_disabled_page_ids', 5 );
+
 // Skip if it is WP Backend.
 if ( is_admin() ) {
+	return;
+}
+
+/**
+ * Checks if the plugin has to be disabled.
+ *
+ * Return true if it has to be disabled.
+ *
+ * @return bool.
+ */
+$disable_rt_optimzer = apply_filters( 'disable_rt_scripts_optimizer', false );
+
+if ( $disable_rt_optimzer ) {
 	return;
 }
 
@@ -98,19 +166,6 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 		return $tag;
 	}
 
-	/**
-	 * Checks if the plugin has to be disabled.
-	 *
-	 * Return true if it has to be disabled.
-	 *
-	 * @return bool.
-	 */
-	$disable_rt_optimzer = apply_filters( 'disable_rt_scripts_optimizer', false );
-
-	if ( $disable_rt_optimzer ) {
-		return $tag;
-	}
-
 	$handles_option_array = explode( ',', get_option( 'rt_scripts_optimizer_exclude_handles' ) );
 	$paths_option_array   = explode( ',', get_option( 'rt_scripts_optimizer_exclude_paths' ) );
 
@@ -163,19 +218,6 @@ add_filter( 'script_loader_tag', 'rt_scripts_handler', 10, 3 );
 function load_async_styles( $html, $handle ) {
 
 	if ( function_exists( 'amp_is_request' ) && amp_is_request() ) {
-		return $html;
-	}
-
-	/**
-	 * Checks if the plugin has to be disabled.
-	 *
-	 * Return true if it has to be disabled.
-	 *
-	 * @return bool.
-	 */
-	$disable_rt_optimzer = apply_filters( 'disable_rt_scripts_optimizer', false );
-
-	if ( $disable_rt_optimzer ) {
 		return $html;
 	}
 
@@ -274,19 +316,6 @@ add_action( 'wp_footer', 'style_enqueue_script' );
 function dequeue_styles() {
 
 	if ( function_exists( 'amp_is_request' ) && amp_is_request() ) {
-		return;
-	}
-
-	/**
-	 * Checks if the plugin has to be disabled.
-	 *
-	 * Return true if it has to be disabled.
-	 *
-	 * @return bool.
-	 */
-	$disable_rt_optimzer = apply_filters( 'disable_rt_scripts_optimizer', false );
-
-	if ( $disable_rt_optimzer ) {
 		return;
 	}
 
