@@ -34,39 +34,42 @@ function rt_scripts_optimizer_check_disabled_page_ids( $disable ) {
 	if ( $disable ) {
 		return $disable;
 	}
-	
+
 	// Get the disabled page IDs setting.
 	$disabled_page_ids = get_option( 'rt_scripts_optimizer_disabled_page_ids', '' );
-	
+
 	// If no disabled page IDs are set, return current status.
 	if ( empty( $disabled_page_ids ) ) {
 		return $disable;
 	}
-	
-	// Get current page/post ID - get_queried_object_id() works reliably with 'wp' hook
+
+	// Get current page/post ID - get_queried_object_id() works reliably with 'wp' hook.
 	$current_id = get_queried_object_id();
-	
+
 	// If no current ID found, return current status.
 	if ( ! $current_id ) {
 		return $disable;
 	}
-	
+
 	// Convert CSV string to array and trim whitespace.
 	$disabled_ids_array = array_map( 'trim', explode( ',', $disabled_page_ids ) );
-	
+
 	// Remove empty values and non-numeric values from array.
-	$disabled_ids_array = array_filter( $disabled_ids_array, function( $value ) {
-		return ! empty( $value ) && is_numeric( $value ) && intval( $value ) > 0;
-	} );
-	
+	$disabled_ids_array = array_filter(
+		$disabled_ids_array,
+		function ( $value ) {
+			return ! empty( $value ) && is_numeric( $value ) && intval( $value ) > 0;
+		}
+	);
+
 	// Convert to integers for comparison.
 	$disabled_ids_array = array_map( 'intval', $disabled_ids_array );
-	
+
 	// Check if current page ID is in the disabled list.
 	if ( in_array( $current_id, $disabled_ids_array, true ) ) {
 		return true;
 	}
-	
+
 	return $disable;
 }
 
@@ -101,7 +104,7 @@ function rt_scripts_optimizer_init() {
 		return;
 	}
 
-	// Register all hooks
+	// Register all hooks.
 	add_action( 'wp_head', 'rt_head_scripts', 0 );
 	add_action( 'wp_footer', 'rt_footer_scripts' );
 	add_filter( 'script_loader_tag', 'rt_scripts_handler', 10, 3 );
@@ -109,20 +112,20 @@ function rt_scripts_optimizer_init() {
 	add_action( 'wp_footer', 'style_enqueue_script' );
 	add_action( 'wp_print_styles', 'dequeue_styles' );
 	add_filter( 'js_do_concat', '__return_false' );
-	
+
 	if ( '1' === get_option( 'rt_scripts_optimizer_skip_css_concatination_all' ) ) {
 		add_filter( 'css_do_concat', '__return_false' );
 	} else {
 		add_filter( 'css_do_concat', 'skip_css_concatination', 10, 2 );
 	}
-	
+
 	add_action( 'init', 'disable_emojis' );
 	add_action( 'wp_enqueue_scripts', 'rt_scripts_optimizer_load_scripts' );
 	add_action( 'the_content', 'rt_scripts_optimizer_iframe_lazy_loading', PHP_INT_MAX );
 	add_filter( 'render_block', 'rt_scripts_optimizer_modify_embeds', 10, 2 );
 }
 
-// Hook to 'wp' action - runs after post/page is loaded
+// Hook to 'wp' action - runs after post/page is loaded.
 add_action( 'wp', 'rt_scripts_optimizer_init' );
 
 // Variable to store the scripts to be excluded.
@@ -232,8 +235,8 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 	);
 
 	return $tag;
-
 }
+
 /**
  * Loads the specified stylesheets asynchronously.
  *
@@ -415,9 +418,7 @@ function disable_emojis_remove_dns_prefetch( $urls, $relation_type ) {
  * Enqueues loadCSS scripts.
  */
 function rt_scripts_optimizer_load_scripts() {
-
 	wp_enqueue_script( 'loadCSS', RT_SCRIPTS_OPTIMIZER_DIR_URL . '/assets/js/loadCSS.min.js', array(), filemtime( RT_SCRIPTS_OPTIMIZER_DIR_PATH . '/assets/js/loadCSS.min.js' ), false );
-
 }
 
 /**
@@ -440,7 +441,7 @@ function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
 	);
 
 	foreach ( $iframes_to_lzay_load as $iframe_to_lzay_load ) {
-		$content = preg_replace( '~<iframe[^>]*\K (?=src=[^>]*('. $iframe_to_lzay_load .')[^>]*)~i', ' data-', $content );
+		$content = preg_replace( '~<iframe[^>]*\K (?=src=[^>]*(' . $iframe_to_lzay_load . ')[^>]*)~i', ' data-', $content );
 	}
 
 	return $content;
@@ -454,12 +455,11 @@ function rt_scripts_optimizer_iframe_lazy_loading( $content ) {
  */
 function rt_scripts_optimizer_modify_embeds( $block_content, $block ) {
 
-	if ( 'core/embed' === $block['blockName'] && in_array( $block['attrs']['providerNameSlug'], [ 'reddit', 'twitter', 'instagram' ], true ) ) {
+	if ( 'core/embed' === $block['blockName'] && in_array( $block['attrs']['providerNameSlug'], array( 'reddit', 'twitter', 'instagram' ), true ) ) {
 
 		$block_content = preg_replace( '~<script~i', '<script type=\'text/rtscript-noautoload\'', $block_content );
 
 	}
 
 	return $block_content;
-
 }
