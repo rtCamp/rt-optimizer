@@ -121,10 +121,8 @@ add_action( 'admin_init', 'rt_settings_init' );
 
 /**
  * Section Description callback.
- *
- * @param array $args arguments passed.
  */
-function rt_scripts_optimizer_settings_callback( $args ) {
+function rt_scripts_optimizer_settings_callback() {
 	?>
 		<p>
 			<?php esc_html_e( 'Add scripts to exclude from the RT Scripts Optimizer by providing it\'s handle or path.', 'RT_Script_Optimizer' ); ?>
@@ -134,10 +132,8 @@ function rt_scripts_optimizer_settings_callback( $args ) {
 
 /**
  * Field callback to accept handles to exclude.
- *
- * @param array $args arguments passed.
  */
-function rt_scripts_optimizer_handles_field_callback( $args ) {
+function rt_scripts_optimizer_handles_field_callback() {
 
 	// option value.
 	$handles = get_option( 'rt_scripts_optimizer_exclude_handles' );
@@ -160,10 +156,8 @@ function rt_scripts_optimizer_handles_field_callback( $args ) {
 
 /**
  * Field callback to accept handles of stylesheets to be dequeued when user not logged in.
- *
- * @param array $args arguments passed.
  */
-function rt_scripts_optimizer_style_dequeue_non_logged_handles_callback( $args ) {
+function rt_scripts_optimizer_style_dequeue_non_logged_handles_callback() {
 
 	// option value.
 	$paths = get_option( 'rt_scripts_optimizer_style_dequeue_non_logged_handles' );
@@ -186,10 +180,8 @@ function rt_scripts_optimizer_style_dequeue_non_logged_handles_callback( $args )
 
 /**
  * Field callback to accept handles of stylesheets to be loaded asynchronously.
- *
- * @param array $args arguments passed.
  */
-function rt_scripts_optimizer_style_async_handles_callback( $args ) {
+function rt_scripts_optimizer_style_async_handles_callback() {
 
 	// option value.
 	$paths = get_option( 'rt_scripts_optimizer_style_async_handles' );
@@ -212,10 +204,8 @@ function rt_scripts_optimizer_style_async_handles_callback( $args ) {
 
 /**
  * Field callback to accept handles of stylesheets to be loaded asynchronously on windows event.
- *
- * @param array $args arguments passed.
  */
-function rt_scripts_optimizer_style_async_handles_onevent_callback( $args ) {
+function rt_scripts_optimizer_style_async_handles_onevent_callback() {
 
 	// option value.
 	$paths = get_option( 'rt_scripts_optimizer_style_async_handles_onevent' );
@@ -238,10 +228,8 @@ function rt_scripts_optimizer_style_async_handles_onevent_callback( $args ) {
 
 /**
  * Field callback to take input of whether to include amp-boilerplate css or not.
- *
- * @param array $args arguments passed.
  */
-function rt_scripts_optimizer_load_amp_boilerplate_style_callback( $args ) {
+function rt_scripts_optimizer_load_amp_boilerplate_style_callback() {
 
 	// option value.
 	$load_amp_css = get_option( 'rt_scripts_optimizer_load_amp_boilerplate_style' );
@@ -259,10 +247,8 @@ function rt_scripts_optimizer_load_amp_boilerplate_style_callback( $args ) {
 
 /**
  * Field callback to take input of whether to skip all CSS concatination or not.
- *
- * @param array $args arguments passed.
  */
-function rt_scripts_optimizer_skip_css_concatination_all_callback( $args ) {
+function rt_scripts_optimizer_skip_css_concatination_all_callback() {
 
 	// option value.
 	$skip_css_concatination = get_option( 'rt_scripts_optimizer_skip_css_concatination_all' );
@@ -280,10 +266,8 @@ function rt_scripts_optimizer_skip_css_concatination_all_callback( $args ) {
 
 /**
  * Field callback to take input of stylesheet handles which are not to be concated.
- *
- * @param array $args arguments passed.
  */
-function rt_scripts_optimizer_skip_css_concatination_handles_callback( $args ) {
+function rt_scripts_optimizer_skip_css_concatination_handles_callback() {
 
 	// option value.
 	$handles = get_option( 'rt_scripts_optimizer_skip_css_concatination_handles' );
@@ -306,10 +290,8 @@ function rt_scripts_optimizer_skip_css_concatination_handles_callback( $args ) {
 
 /**
  * Field callback to accept page IDs where the plugin should be disabled.
- *
- * @param array $args arguments passed.
  */
-function rt_scripts_optimizer_disabled_page_ids_callback( $args ) {
+function rt_scripts_optimizer_disabled_page_ids_callback() {
 
 	// option value.
 	$page_ids = get_option( 'rt_scripts_optimizer_disabled_page_ids' );
@@ -333,10 +315,8 @@ function rt_scripts_optimizer_disabled_page_ids_callback( $args ) {
 
 /**
  * Field callback to accept paths of scripts to exclude.
- *
- * @param array $args arguments passed.
  */
-function rt_scripts_optimizer_paths_field_callback( $args ) {
+function rt_scripts_optimizer_paths_field_callback() {
 
 	// option value.
 	$paths = get_option( 'rt_scripts_optimizer_exclude_paths' );
@@ -372,9 +352,7 @@ function rt_scripts_optimizer_options_submenu() {
 		'rt-scripts-optimizer-settings',
 		'rt_scripts_optimizer_settings_template'
 	);
-
 }
-
 
 /**
  * Top level menu callback function
