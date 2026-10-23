@@ -6,6 +6,7 @@
  * Plugin URI:  https://rtcamp.com
  * Author URI:  https://rtcamp.com
  * Version: 0.1
+ * Requires at least: 6.2
  * Text Domain: rt-script-optimizer
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -170,7 +171,7 @@ function rt_footer_scripts() {
 		return null;
 	}
 	?>
-		<script type="text/javascript">const t = ["mouseover", "keydown", "touchmove", "touchstart", "scroll"]; t.forEach(function (t) { window.addEventListener(t, e, { passive: true }) }); function e() { n(); t.forEach(function (t) { window.removeEventListener(t, e, { passive: true }) }) } function c(t, e, n) { if (typeof n === "undefined") { n = 0 } t[n](function () { n++; if (n === t.length) { e() } else { c(t, e, n) } }) } function u() { var t = document.createEvent("Event"); t.initEvent("DOMContentLoaded", true, true); window.dispatchEvent(t); document.dispatchEvent(t); var e = document.createEvent("Event"); e.initEvent("readystatechange", true, true); window.dispatchEvent(e); document.dispatchEvent(e); var n = document.createEvent("Event"); n.initEvent("load", true, true); window.dispatchEvent(n); document.dispatchEvent(n); var o = document.createEvent("Event"); o.initEvent("show", true, true); window.dispatchEvent(o); document.dispatchEvent(o); var c = window.document.createEvent("UIEvents"); c.initUIEvent("resize", true, true, window, 0); window.dispatchEvent(c); document.dispatchEvent(c); } function rti(t, e) { var n = document.createElement("script"); n.type = "text/javascript"; if (t.src) { n.onload = e; n.onerror = e; n.src = t.src; n.id = t.id } else { n.textContent = t.innerText; n.id = t.id } t.parentNode.removeChild(t); document.body.appendChild(n); if (!t.src) { e() } } function n() { var t = document.querySelectorAll("script"); var n = []; var o;[].forEach.call(t, function (e) { o = e.getAttribute("type"); if (o == "text/rtscript") { n.push(function (t) { rti(e, t) }) } }); c(n, u) }</script>
+		<script type="text/javascript">const t = ["mouseover", "keydown", "touchmove", "touchstart", "scroll"]; t.forEach(function (t) { window.addEventListener(t, e, { passive: true }) }); function e() { n(); t.forEach(function (t) { window.removeEventListener(t, e, { passive: true }) }) } function c(t, e, n) { if (typeof n === "undefined") { n = 0 } t[n](function () { n++; if (n === t.length) { e() } else { c(t, e, n) } }) } function u() { var t = document.createEvent("Event"); t.initEvent("DOMContentLoaded", true, true); window.dispatchEvent(t); document.dispatchEvent(t); var e = document.createEvent("Event"); e.initEvent("readystatechange", true, true); window.dispatchEvent(e); document.dispatchEvent(e); var n = document.createEvent("Event"); n.initEvent("load", true, true); window.dispatchEvent(n); document.dispatchEvent(n); var o = document.createEvent("Event"); o.initEvent("show", true, true); window.dispatchEvent(o); document.dispatchEvent(o); var c = window.document.createEvent("UIEvents"); c.initUIEvent("resize", true, true, window, 0); window.dispatchEvent(c); document.dispatchEvent(c); } function rti(t, e) { var n = document.createElement("script"); [].forEach.call(t.attributes, function (a) { if (a.name !== "type") { n.setAttribute(a.name, a.value) } }); if (t.nonce) { n.nonce = t.nonce } n.type = "text/javascript"; if (t.src) { n.onload = e; n.onerror = e } else { n.textContent = t.innerText } t.parentNode.removeChild(t); document.body.appendChild(n); if (!t.src) { e() } } function n() { var t = document.querySelectorAll("script"); var n = []; var o;[].forEach.call(t, function (e) { o = e.getAttribute("type"); if (o == "text/rtscript") { n.push(function (t) { rti(e, t) }) } }); c(n, u) }</script>
 	<?php
 }
 
@@ -224,14 +225,30 @@ function rt_scripts_handler( $tag, $handle, $src ) {
 		return $tag;
 	}
 
-	// Change the script attributes and id before returning to remove it from main thread.
-	$tag = sprintf(
-		'<script type="text/rtscript" src="%s" id="%s"></script>',  // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		esc_url( $src ),
-		$handle . '-js'
-	);
+	// The HTML API is needed to safely change the type attribute. Without it, load the script normally.
+	if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+		return $tag;
+	}
 
-	return $tag;
+	/*
+	 * Only change the type attribute to remove the scripts from main thread, keeping every other attribute
+	 * (integrity, crossorigin, nonce, etc.) set by WordPress or other code. The inline before/after and
+	 * translation scripts of the handle are delayed too, so they still run in order around the main script.
+	 */
+	$processor = new WP_HTML_Tag_Processor( $tag );
+
+	while ( $processor->next_tag( 'script' ) ) {
+		$type = $processor->get_attribute( 'type' );
+
+		// Leave non-classic scripts (modules, JSON data, etc.) untouched.
+		if ( is_string( $type ) && ! in_array( strtolower( trim( $type ) ), array( '', 'text/javascript', 'application/javascript' ), true ) ) {
+			continue;
+		}
+
+		$processor->set_attribute( 'type', 'text/rtscript' );
+	}
+
+	return $processor->get_updated_html();
 
 }
 /**
